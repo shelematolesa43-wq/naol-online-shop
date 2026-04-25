@@ -769,28 +769,6 @@ async function addShoe() {
     location.reload(); // Suuraan akka mul'atuuf refresh godha
 }
 
-// 2. Suuraa agarsiisuuf
-function renderShop(items) {
-    const container = document.getElementById('shop-display');
-    container.innerHTML = '';
-
-    items.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'shoe-card';
-        card.innerHTML = `
-            <div class="shoe-img-box" style="height:200px; overflow:hidden; border-radius:10px;">
-                <img src="${item.img_url}" style="width:100%; height:100%; object-fit:cover;" 
-                     onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-            </div>
-            <div style="margin-top:15px;">
-                <h3 style="font-size:1.1rem;">${item.name}</h3>
-                <p style="color:var(--cta); font-weight:800; font-size:1.2rem;">ETB ${item.price}</p>
-                <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY NOW</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
 
     async function deleteProduct(id) {
         if(confirm("Confirm deletion?")) {
@@ -800,35 +778,82 @@ function renderShop(items) {
         }
     }
 
-    // 4. Shop Features
-   async function handlePurchase(id, name, price) {
-    // 1. Bank selector sirreessi (item.id irraa gara id)
-    const bankElement = document.getElementById(`bank-${id}`);
-    const sizeElement = document.getElementById(`size-${id}`);
-    
-    if(!bankElement || !sizeElement) return;
+   // 2. FUNKTII RENDER (Dropdown qabu tokko qofa)
+    function renderShop(items) {
+        const container = document.getElementById('shop-display');
+        container.innerHTML = '';
+        
+        if(items.length === 0) {
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
+            return;
+        }
 
-    const bank = bankElement.value;
-    const size = sizeElement.value;
+        items.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'shoe-card';
+            card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
+            card.style.opacity = '0';
+            
+            card.innerHTML = `
+                <div class="shoe-img-box">
+                    <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <h3 style="font-weight:700;">${item.name}</h3>
+                    <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
+                </div>
+                
+                <div style="margin-bottom:10px;">
+                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
+                    <select id="size-${item.id}" class="shop-select">
+                        <option value="39">size 39</option>
+                        <option value="40">size 40</option>
+                        <option value="41">size 41</option>
+                        <option value="42">size 42</option>
+                        <option value="43">size 43</option>
+                        <option value="44">size 44</option>
+                    </select>
+                </div>
 
-    // Gara PHP erguuf
-    const fd = new FormData();
-    fd.append('action', 'place_order');
-    fd.append('item_name', name);
-    fd.append('price', price);
-    fd.append('size', size);
-    fd.append('bank', bank);
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
+                    <select id="bank-${item.id}" class="shop-select">
+                        <option value="CBE">CBE (Commercial Bank)</option>
+                        <option value="CBO">CBO (Coop Bank)</option>
+                        <option value="SINQEE">SINQEE Bank</option>
+                        <option value="TELEBIRR">TELEBIRR</option>
+                    </select>
+                </div>
 
-    try {
+                <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY NOW</button>
+                
+                ${isAdminStatus ? `
+                    <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
+                        <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
+                    </div>
+                ` : ''}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // 3. Purchase Handler
+    async function handlePurchase(id, name, price) {
+        const bank = document.getElementById(`bank-${id}`).value;
+        const size = document.getElementById(`size-${id}`).value;
+
+        const fd = new FormData();
+        fd.append('action', 'place_order');
+        fd.append('item_name', name);
+        fd.append('price', price);
+        fd.append('size', size);
+        fd.append('bank', bank);
+
         const res = await fetch('index.php', { method: 'POST', body: fd });
         const result = await res.json();
-
         if(result.status === "success") {
-            notify("Email", "Order details sent to Naol.");
-            showToast("Success", "Order sent to Naol's email!");
+            showToast("Order Sent!", "Naol will contact you soon.");
         }
-    } catch (e) {
-        console.error("Order failed", e);
     }
 
     // Order history irratti dabaluu
