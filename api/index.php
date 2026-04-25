@@ -616,63 +616,64 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
     }
 
     // 2. Render Products
-    function renderShop(items) {
-        const container = document.getElementById('shop-display');
-        container.innerHTML = '';
-        
-        if(items.length === 0) {
-            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
-            return;
-        }
+   function renderShop(items) {
+    const container = document.getElementById('shop-display');
+    container.innerHTML = '';
+    
+    if(items.length === 0) {
+        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
+        return;
+    }
 
     items.forEach((item, i) => {
-    const card = document.createElement('div');
-    card.className = 'shoe-card';
-    card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
-    card.style.opacity = '0';
-    
-    card.innerHTML = `
-        <div class="shoe-img-box">
-            <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
-        </div>
-        <div style="margin-bottom:15px;">
-            <h3 style="font-weight:700;">${item.name}</h3>
-            <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
-        </div>
+        const card = document.createElement('div');
+        card.className = 'shoe-card';
+        card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
+        card.style.opacity = '0';
         
-        <div style="margin-bottom:15px;">
-            <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
-            <select id="size-${item.id}" class="admin-field" style="margin:5px 0;">
-                <option value="39">size 39</option>
-                <option value="40">size 40</option>
-                <option value="41">size 41</option>
-                <option value="42">size 42</option>
-                <option value="43">size 43</option>
-                <option value="44">size 44</option>
-            </select>
-        </div>
-
-        <div style="margin-bottom:15px;">
-            <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
-            <select id="bank-${item.id}" class="admin-field" style="margin:5px 0;">
-                <option value="CBE">CBE</option>
-                <option value="CBO">CBO</option>
-                <option value="SINQEE">SINQEE</option>
-                <option value="TELEBIR">TELEBIR</option>
-            </select>
-        </div>
-
-        <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY</button>
-        
-        ${isAdminStatus ? `
-            <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
-                <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
-                <button onclick="editProduct(${item.id})" style="color:blue; background:none; border:none; cursor:pointer; font-weight:bold;">Edit</button>
+        card.innerHTML = `
+            <div class="shoe-img-box">
+                <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
             </div>
-        ` : ''};
-    `
-    container.appendChild(card);
-});
+            <div style="margin-bottom:15px;">
+                <h3 style="font-weight:700;">${item.name}</h3>
+                <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
+            </div>
+            
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
+                <select id="size-${item.id}" class="admin-field" style="margin:5px 0;">
+                    <option value="39">size 39</option>
+                    <option value="40">size 40</option>
+                    <option value="41">size 41</option>
+                    <option value="42">size 42</option>
+                    <option value="43">size 43</option>
+                    <option value="44">size 44</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
+                <select id="bank-${item.id}" class="admin-field" style="margin:5px 0;">
+                    <option value="CBE">CBE</option>
+                    <option value="CBO">CBO</option>
+                    <option value="SINQEE">SINQEE</option>
+                    <option value="TELEBIR">TELEBIR</option>
+                </select>
+            </div>
+
+            <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY</button>
+            
+            ${isAdminStatus ? `
+                <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
+                    <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
+                    <button onclick="editProduct(${item.id})" style="color:blue; background:none; border:none; cursor:pointer; font-weight:bold;">Edit</button>
+                </div>
+            ` : ''}
+        `; // Asirratti mallattoo ` dabalamee jira
+        container.appendChild(card);
+    }); // Asirratti }) cufamee jira
+}
     // 3. Admin Handlers
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
