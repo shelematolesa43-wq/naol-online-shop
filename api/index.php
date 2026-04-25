@@ -29,6 +29,34 @@ $success = mysqli_real_connect(
 if (!$success) {
     die("Database Connection Failed: " . mysqli_connect_error());
 }
+// --- DATABASE TABLES UUMUUF (KANA DABALADHU) ---
+if ($success) {
+    // 1. Table products
+    $conn->query("CREATE TABLE IF NOT EXISTS products (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        img_url VARCHAR(500),
+        stock INT DEFAULT 10,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // 2. Table shop_settings
+    $conn->query("CREATE TABLE IF NOT EXISTS shop_settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(50) UNIQUE,
+        setting_value TEXT
+    )");
+
+    // 3. Initial settings galchuuf
+    $conn->query("INSERT IGNORE INTO shop_settings (setting_key, setting_value) VALUES ('shop_name', 'NAOL SHOP'), ('location', 'Burrayu, Ethiopia')");
+    
+    // 4. Admin user yoo hin jirre uumuuf (Username: admin, Password: password123)
+    $pass_hash = password_hash('password123', PASSWORD_DEFAULT);
+    $conn->query("CREATE TABLE IF NOT EXISTS admin_users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) UNIQUE, password_hash VARCHAR(255))");
+    $conn->query("INSERT IGNORE INTO admin_users (username, password_hash) VALUES ('admin', '$pass_hash')");
+}
+// ----------------------------------------------
 function isAdmin() {
     return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 }
