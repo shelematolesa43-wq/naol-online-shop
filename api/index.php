@@ -1,44 +1,41 @@
 <?php
-/**
- * NAOL SHOP - FULL STACK E-COMMERCE ENGINE
- * Developed by: Shelema Tolesa
- * Features: Admin Panel, Product Management, Secure Auth, Responsive UI
- */
-
 // --- SECTION 1: DATABASE & SESSION CONFIGURATION ---
 session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// --- DATABASE CONFIGURATION ---
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-$pass = "AVNS_an3G9_uvEmH_QWK4EQx"; // Bakka kanaan dura '**********' jiru password kee isa sirrii galchi
+$pass = "AVNS_an3G9_uvEmH_QWK4EQx";
 $db   = "defaultdb";
 $port = 23454;
 
-// Walitti qabsiisuuf (Connection)
-$conn = new mysqli($host, $user, $pass, $db, $port);
-
+// 1. Initialize MySQLi
 $conn = mysqli_init();
+
+// 2. SSL Required waan ta'eef qindaa'ina kana dabali
+// Aiven certificate sirriitti akka hojjetuuf kana qofa dhiisi
 mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
-mysqli_real_connect($conn, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
-if (mysqli_connect_errno()) {
-    die("SSL Connection Failed: " . mysqli_connect_error());
-}
-if ($conn->connect_error) {
-    die("Database Connection Failed: " . $conn->connect_error);
+// 3. Connect gochuu (SSL dabalatee)
+$success = mysqli_real_connect(
+    $conn, 
+    $host, 
+    $user, 
+    $pass, 
+    $db, 
+    $port, 
+    NULL, 
+    MYSQLI_CLIENT_SSL
+);
+
+if (!$success) {
+    die("Database Connection Failed: " . mysqli_connect_error());
 }
 
-if ($conn->connect_error) {
-    $db_connected = false; 
-} else {
-    $db_connected = true;
-}
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// --- KOODII KEE ISA KAAN JALATTI ITTI FUFI ---
+// Fakkeenyaaf: $sql = "SELECT * FROM products"; ...
 // 2.10 API: Handle Order & Send Email
 if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
     $name = $_POST['item_name'];
