@@ -776,43 +776,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
         const s = document.getElementById('settings-panel');
         s.style.display = s.style.display === 'none' ? 'block' : 'none';
     }
-async function handlePurchase(id, name, price) {
-    const size = document.getElementById(`size-${id}`).value;
-    const bank = document.getElementById(`bank-${item.id}`).value; // Bank filatame
-
-    // Gara PHP erguuf (Email akka ba'uuf)
-    const fd = new FormData();
-    fd.append('action', 'place_order');
-    fd.append('item_name', name);
-    fd.append('price', price);
-    fd.append('size', size);
-    fd.append('bank', bank);
-
-    const res = await fetch('index.php', { method: 'POST', body: fd });
-    const result = await res.json();
-
-    if(result.status === "success") {
-        notify("Email", "Order details sent to Naol.");
-        showToast("Success", "Order sent to Naol's email!");
-    }
-
-    // Logic'n kanaan dura ture itti fufa (Order history irratti dabaluu)
-    orders++;
-    document.getElementById('order-badge').innerText = orders;
-    // ... (koodii kee isa duraa)
-}
-    async function saveSettings() {
-        const name = document.getElementById('set-shop-name').value;
-        const loc = document.getElementById('set-location').value;
-        
-        const fd = new FormData();
-        fd.append('update_settings', '1');
-        if(name) fd.append('shop_name', name);
-        if(loc) fd.append('location', loc);
-
-        await fetch('index.php', { method: 'POST', body: fd });
-        location.reload();
-    }
 
     window.onload = init;
 </script>
