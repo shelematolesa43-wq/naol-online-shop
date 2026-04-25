@@ -637,8 +637,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
                 <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
                 <button onclick="editProduct(${item.id})" style="color:blue; background:none; border:none; cursor:pointer; font-weight:bold;">Edit</button>
             </div>
-        ` : ''}
-    `;
+        ` : ''};
+    `
     container.appendChild(card);
 });
     // 3. Admin Handlers
