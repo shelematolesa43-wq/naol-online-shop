@@ -502,7 +502,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             </div>
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
                 <span style="font-size:1.6rem;">🛎️</span>
-                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px;">0</span>
+                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px;">🛒</span>
                 <div class="notif-dropdown" id="notif-dropdown">
                     <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Notifications</h4>
                     <div id="notif-list" style="margin-top:10px;"></div>
