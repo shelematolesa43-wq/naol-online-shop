@@ -2,16 +2,17 @@
 // --- DATABASE CONFIGURATION ---
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-$pass = 'AVNS_an3G9_uvEmH_QWK4EQx'; // Single quotes qofa fayyadami!
+// Mallattoo ' ' (single quotes) fayyadamuun dirqama, yoo " " fayyadamte hin hojjetu!
+$pass = 'AVNS__vcyJnLCW7tPcJRITMN'; 
 $db   = "defaultdb";
 $port = 23454;
 
 $conn = mysqli_init();
 
-// SSL Configuration Aiven-iif
+// Aiven irratti SSL Required waan ta'eef qindaa'ina kana dabali
 mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-// Connection
+// Connect gochuu (SSL dabalatee)
 $success = mysqli_real_connect(
     $conn, 
     $host, 
