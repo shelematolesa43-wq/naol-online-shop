@@ -1,5 +1,7 @@
 <?php
-// --- DATABASE CONFIGURATION ---
+// --- DATABASE CONFIGURATION
+session_start(); // Kana dabaladhu!
+
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
 // Password kee mallattoo ' ' (single quotes) qofa keessa galchi
@@ -27,7 +29,9 @@ $success = mysqli_real_connect(
 if (!$success) {
     die("Database Connection Failed: " . mysqli_connect_error());
 }
-
+function isAdmin() {
+    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+}
 
 // 2.2 API: Handle Order & Send Email (Naol Shop Notification)
 if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
@@ -690,23 +694,49 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
     }
 
     // 4. Shop Features
-    function handlePurchase(id, name, price) {
-        const size = document.getElementById(`size-${id}`).value;
-        orders++;
-        document.getElementById('order-badge').innerText = orders;
-        document.getElementById('order-badge').style.display = 'block';
-        
-        const hist = document.getElementById('order-history-list');
-        if(orders === 1) hist.innerHTML = '';
-        
-        const div = document.createElement('div');
-        div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem;";
-        div.innerHTML = `<b>${name}</b><br>Size: ${size} | ETB ${price}<br><small style="color:green;">Status: Processing</small>`;
-        hist.prepend(div);
-        
-        notify("Order", `Successfully added ${name} to orders.`);
-        showToast("Success", "Added to your orders!");
+   async function handlePurchase(id, name, price) {
+    // 1. Bank selector sirreessi (item.id irraa gara id)
+    const bankElement = document.getElementById(`bank-${id}`);
+    const sizeElement = document.getElementById(`size-${id}`);
+    
+    if(!bankElement || !sizeElement) return;
+
+    const bank = bankElement.value;
+    const size = sizeElement.value;
+
+    // Gara PHP erguuf
+    const fd = new FormData();
+    fd.append('action', 'place_order');
+    fd.append('item_name', name);
+    fd.append('price', price);
+    fd.append('size', size);
+    fd.append('bank', bank);
+
+    try {
+        const res = await fetch('index.php', { method: 'POST', body: fd });
+        const result = await res.json();
+
+        if(result.status === "success") {
+            notify("Email", "Order details sent to Naol.");
+            showToast("Success", "Order sent to Naol's email!");
+        }
+    } catch (e) {
+        console.error("Order failed", e);
     }
+
+    // Order history irratti dabaluu
+    orders++;
+    document.getElementById('order-badge').innerText = orders;
+    document.getElementById('order-badge').style.display = 'block';
+    
+    const hist = document.getElementById('order-history-list');
+    if(orders === 1) hist.innerHTML = '';
+    
+    const div = document.createElement('div');
+    div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem;";
+    div.innerHTML = `<b>${name}</b><br>Size: ${size} | Bank: ${bank}<br><small style="color:green;">Status: Processing</small>`;
+    hist.prepend(div);
+}
 
     function notify(type, msg) {
         notifs++;
