@@ -2,17 +2,17 @@
 // --- DATABASE CONFIGURATION ---
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-// Mallattoo ' ' (single quotes) fayyadamuun dirqama, yoo " " fayyadamte hin hojjetu!
+// Password kee mallattoo ' ' (single quotes) qofa keessa galchi
 $pass = 'AVNS__vcyJnLCW7tPcJRITMN'; 
 $db   = "defaultdb";
 $port = 23454;
 
 $conn = mysqli_init();
 
-// Aiven irratti SSL Required waan ta'eef qindaa'ina kana dabali
+// Aiven SSL REQUIRED waan ta'eef kana dabalun dirqama
 mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-// Connect gochuu (SSL dabalatee)
+// Sarara 15: mysqli_real_connect
 $success = mysqli_real_connect(
     $conn, 
     $host, 
@@ -28,12 +28,6 @@ if (!$success) {
     die("Database Connection Failed: " . mysqli_connect_error());
 }
 
-// --- SECTION 2: BACKEND API LOGIC ---
-
-// 2.1 Helper Functions
-function isAdmin() { 
-    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true; 
-}
 
 // 2.2 API: Handle Order & Send Email (Naol Shop Notification)
 if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
