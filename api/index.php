@@ -400,7 +400,25 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
             gap: 2.5rem; 
         }
-        
+        /* Akka Dropdown sun dirqama mul'atu godha */
+.shop-select {
+    display: block !important; /* Dhokatee yoo jiraate akka mul'atu godha */
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Shoe card keessatti iddoo akka qabaatu godha */
+.shoe-card {
+    height: auto !important; /* Dheerinni isaa akka dabalatuuf */
+    padding-bottom: 20px;
+}
         .shoe-card { 
             background: var(--white); 
             border-radius: 16px; 
