@@ -1,23 +1,17 @@
 <?php
-// --- SECTION 1: DATABASE & SESSION CONFIGURATION ---
-session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // --- DATABASE CONFIGURATION ---
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-$pass = 'AVNS_an3G9_uvEmH_QWK4EQx'; // Single quotes fayyadamuun filatamaadha
+$pass = 'AVNS_an3G9_uvEmH_QWK4EQx'; // Single quotes qofa fayyadami!
 $db   = "defaultdb";
 $port = 23454;
 
-// 1. Initialize MySQLi
 $conn = mysqli_init();
 
-// 2. SSL Setup (Aiven-iif murteessaadha)
+// SSL Configuration Aiven-iif
 mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-// 3. Connect gochuu
+// Connection
 $success = mysqli_real_connect(
     $conn, 
     $host, 
