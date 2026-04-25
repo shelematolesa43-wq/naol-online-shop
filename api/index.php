@@ -492,9 +492,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
                 <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
                 <strong style="font-size:0.9rem;">Orders</strong>
-                <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-10px; right:-15px; display:none;">0</span>
+                <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-10px; right:-15px; display:none;"></span>
                 <div class="notif-dropdown" id="order-dropdown">
-                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Order History</h4>
+                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">🛒Order History</h4>
                     <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto;">
                         <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
                     </div>
