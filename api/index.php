@@ -210,6 +210,36 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
     echo json_encode($result->fetch_all(MYSQLI_ASSOC));
     exit;
 }
+    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_shoe'])) {
+    $name = htmlspecialchars($_POST['name']);
+    $price = floatval($_POST['price']);
+    $stock = intval($_POST['stock']);
+    $img_url = "https://via.placeholder.com/300x200?text=No+Image"; // Yoo suuraan hin jirre
+
+    if (isset($_FILES['shoeFile']) && $_FILES['shoeFile']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $ext = strtolower(pathinfo($_FILES["shoeFile"]["name"], PATHINFO_EXTENSION));
+        
+        if (in_array($ext, $allowed)) {
+            $target_dir = "uploads/";
+            if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+            
+            // Maqaa fayilaa adda gochuuf (Fakkeenya: 1714001234_a2b3c4.jpg)
+            $file_name = time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
+            $target_path = $target_dir . $file_name;
+            
+            if (move_uploaded_file($_FILES["shoeFile"]["tmp_name"], $target_path)) {
+                $img_url = $target_path; 
+            }
+        }
+    }
+
+    $stmt = $conn->prepare("INSERT INTO products (name, price, img_url, stock) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sdsi", $name, $price, $img_url, $stock);
+    $stmt->execute();
+    header("Location: index.php");
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -492,9 +522,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
                 <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
                 <strong style="font-size:0.9rem;">Orders</strong>
-                <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-10px; right:-15px; display:none;"></span>
+                <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-10px; right:-15px; display:none;">🛒</span>
                 <div class="notif-dropdown" id="order-dropdown">
-                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">🛒Order History</h4>
+                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Order History</h4>
                     <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto;">
                         <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
                     </div>
@@ -502,7 +532,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             </div>
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
                 <span style="font-size:1.6rem;">🛎️</span>
-                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px;">🛒</span>
+                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem;
+                    position:absolute; top:0; right:-5px;">0</span>
                 <div class="notif-dropdown" id="notif-dropdown">
                     <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Notifications</h4>
                     <div id="notif-list" style="margin-top:10px;"></div>
@@ -535,19 +566,20 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
             <button class="btn-impulse" onclick="saveSettings()" style="width:200px; margin-top:20px;">Update Store</button>
         </div>
 
-        <div id="admin-panel" style="display:none; background:white; padding:30px; border-radius:15px; margin-bottom:30px; border-left:10px solid var(--cta); box-shadow: var(--shadow);">
-            <h3>Add New Inventory</h3>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
-                <input type="text" id="shoeModel" placeholder="Sneaker Name" class="admin-field">
-                <input type="number" id="shoePrice" placeholder="Price (ETB)" class="admin-field">
-                <input type="number" id="shoeStock" placeholder="Stock Quantity" class="admin-field" value="10">
-                <div style="grid-column: 1 / -1;">
-                    <label style="font-weight:600; font-size:0.8rem;">Product Image:</label>
-                    <input type="file" id="shoeFile" class="admin-field" accept="image/*">
-                </div>
-            </div>
-            <button class="btn-impulse" onclick="addShoe()" style="width:200px; margin-top:10px;">List Product</button>
+       <div id="admin-panel" style="display:none; background:white; padding:30px; border-radius:15px; margin-bottom:30px; border-left:10px solid var(--cta); box-shadow: var(--shadow);">
+    <h3>Add New Inventory</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
+        <input type="text" id="shoeModel" placeholder="Sneaker Name" class="admin-field">
+        <input type="number" id="shoePrice" placeholder="Price (ETB)" class="admin-field">
+        <input type="number" id="shoeStock" placeholder="Stock" class="admin-field" value="10">
+        
+        <div style="grid-column: 1 / -1;">
+            <label style="font-weight:600; display:block; margin-bottom:5px;">Select Product Image:</label>
+            <input type="file" id="shoeFile" class="admin-field" accept="image/*" style="padding: 10px;">
         </div>
+    </div>
+    <button class="btn-impulse" onclick="addShoe()" style="width:200px; margin-top:10px;">List Product</button>
+</div>
 
         <div id="shop-display" class="shop-grid"></div>
     </div>
@@ -695,24 +727,52 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
         document.getElementById('login-link').style.display = 'none';
     }
 
-    async function addShoe() {
-        const name = document.getElementById('shoeModel').value;
-        const price = document.getElementById('shoePrice').value;
-        const file = document.getElementById('shoeFile').files[0];
-        
-        if(!name || !price) return alert("Missing data");
-
-        const fd = new FormData();
-        fd.append('add_shoe', '1');
-        fd.append('admin_key', currentKey);
-        fd.append('name', name);
-        fd.append('price', price);
-        fd.append('stock', document.getElementById('shoeStock').value);
-        if(file) fd.append('shoeFile', file);
-
-        await fetch('index.php', { method: 'POST', body: fd });
-        location.reload();
+  // 1. Suuraa erguuf
+async function addShoe() {
+    const name = document.getElementById('shoeModel').value;
+    const price = document.getElementById('shoePrice').value;
+    const stock = document.getElementById('shoeStock').value;
+    const fileInput = document.getElementById('shoeFile');
+    
+    if(!name || !price || fileInput.files.length === 0) {
+        alert("Maaloo hunda guuti, suuraas filadhu!");
+        return;
     }
+
+    const fd = new FormData();
+    fd.append('add_shoe', '1');
+    fd.append('name', name);
+    fd.append('price', price);
+    fd.append('stock', stock);
+    fd.append('shoeFile', fileInput.files[0]);
+    fd.append('admin_key', "naol123"); 
+
+    await fetch('index.php', { method: 'POST', body: fd });
+    location.reload(); // Suuraan akka mul'atuuf refresh godha
+}
+
+// 2. Suuraa agarsiisuuf
+function renderShop(items) {
+    const container = document.getElementById('shop-display');
+    container.innerHTML = '';
+
+    items.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'shoe-card';
+        card.innerHTML = `
+            <div class="shoe-img-box" style="height:200px; overflow:hidden; border-radius:10px;">
+                <img src="${item.img_url}" style="width:100%; height:100%; object-fit:cover;" 
+                     onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            </div>
+            <div style="margin-top:15px;">
+                <h3 style="font-size:1.1rem;">${item.name}</h3>
+                <p style="color:var(--cta); font-weight:800; font-size:1.2rem;">ETB ${item.price}</p>
+                <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY NOW</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
 
     async function deleteProduct(id) {
         if(confirm("Confirm deletion?")) {
