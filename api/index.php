@@ -12,7 +12,7 @@ ini_set('display_errors', 1);
 
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-$pass = "naol123"; // Bakka kanaan dura '**********' jiru password kee isa sirrii galchi
+$pass = "AVNS_an3G9_uvEmH_QWK4EQx"; // Bakka kanaan dura '**********' jiru password kee isa sirrii galchi
 $db   = "defaultdb";
 $port = 23454;
 
