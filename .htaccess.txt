@@ -1,0 +1,3 @@
+# Folder kana keessatti koodiin PHP akka hin hojjenne dhorki
+php_flag engine off
+Options -ExecCGI
