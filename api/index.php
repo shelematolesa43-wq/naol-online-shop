@@ -543,6 +543,21 @@ if ($success) {
             animation: slideIn 0.5s ease;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .notif-dropdown {
+    position: absolute;
+    top: 60px; /* Navbar jalaa akka mul'atuuf */
+    right: 0;
+    width: 320px;
+    background: white;
+    color: black; /* Barreeffamni akka mul'atuuf */
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    padding: 15px;
+    display: none; /* Javascript-tu bana */
+    z-index: 9999; /* Element-oota biroo hunda gubbaa akka ta'u */
+    max-height: 400px;
+    overflow-y: auto;
+}
 .notif-dropdown {
     position: absolute;
     top: 60px;
