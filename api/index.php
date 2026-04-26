@@ -50,7 +50,30 @@ if ($success) {
 
     // 3. Initial settings galchuuf
     $conn->query("INSERT IGNORE INTO shop_settings (setting_key, setting_value) VALUES ('shop_name', 'NAOL SHOP'), ('location', 'Burrayu, Ethiopia')");
-    
+    // 5. Table orders uumuuf (Naol akka arguuf)
+$conn->query("CREATE TABLE IF NOT EXISTS orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(255),
+    size VARCHAR(20),
+    bank VARCHAR(50),
+    price DECIMAL(10, 2),
+    status VARCHAR(20) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+    if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
+    $name = $_POST['item_name'];
+    $price = $_POST['price'];
+    $size = $_POST['size'];
+    $bank = $_POST['bank'];
+
+    // Database keessatti galchuuf (Naol akka arguuf)
+    $stmt = $conn->prepare("INSERT INTO orders (product_name, price, size, bank) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sdss", $name, $price, $size, $bank);
+    $stmt->execute();
+
+    echo json_encode(["status" => "success"]);
+    exit;
+}
     // 4. Admin user yoo hin jirre uumuuf (Username: admin, Password: password123)
     $pass_hash = password_hash('password123', PASSWORD_DEFAULT);
     $conn->query("CREATE TABLE IF NOT EXISTS admin_users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) UNIQUE, password_hash VARCHAR(255))");
@@ -899,6 +922,28 @@ function toggleSidebar() {
             mainContent.classList.toggle('shifted');
         }
     }
+}
+    // Funktii kanaan Naol order haaraa ilaaluu danda'a
+async function checkNewOrders() {
+    if(!isAdminStatus) return; // Yoo admin ta'e qofa
+
+    try {
+        const res = await fetch('index.php?action=get_orders'); // API kana PHP keessatti dabalachuu qabda
+        const orders = await res.json();
+        
+        if(orders.length > 0) {
+            notify("ADMIN ALERT", `${orders.length} orders haaraa dhufeera!`);
+            // Order badge irratti lakkoofsa ni daballa
+            document.getElementById('notif-badge').innerText = orders.length;
+        }
+    } catch (e) {
+        console.log("Admin sync failed");
+    }
+}
+
+// Sekondii 30 30n akka check godhuuf
+if(isAdminStatus) {
+    setInterval(checkNewOrders, 30000);
 }
 
 // Yoo sidebar alatti tuqan akka cufamuuf
