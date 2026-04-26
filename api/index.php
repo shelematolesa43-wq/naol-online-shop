@@ -682,7 +682,7 @@ if ($success) {
             allShoes = data.products;
             
             if(isAdminStatus) {
-                currentKey = "naol123"; // Logic placeholder
+                currentKey = "naol123"; 
                 showAdminUI();
             }
             
@@ -692,66 +692,111 @@ if ($success) {
         }
     }
 
-    // 2. Render Products
-   function renderShop(items) {
-    const container = document.getElementById('shop-display');
-    container.innerHTML = '';
-    
-    if(items.length === 0) {
-        container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
-        return;
+    // 2. Render Products (Bakka tokkotti qofa barreeffame)
+    function renderShop(items) {
+        const container = document.getElementById('shop-display');
+        container.innerHTML = '';
+        
+        if(items.length === 0) {
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
+            return;
+        }
+
+        items.forEach((item, i) => {
+            const card = document.createElement('div');
+            card.className = 'shoe-card';
+            // Animation kee as jira - hin tuqamne
+            card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
+            card.style.opacity = '0';
+            
+            card.innerHTML = `
+                <div class="shoe-img-box">
+                    <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <h3 style="font-weight:700;">${item.name}</h3>
+                    <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
+                </div>
+                
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
+                    <select id="size-${item.id}" class="shop-select" style="width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ddd;">
+                        <option value="39">size 39</option>
+                        <option value="40">size 40</option>
+                        <option value="41">size 41</option>
+                        <option value="42">size 42</option>
+                        <option value="43">size 43</option>
+                        <option value="44">size 44</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
+                    <select id="bank-${item.id}" class="shop-select" style="width:100%; padding:8px; margin-top:5px; border-radius:5px; border:1px solid #ddd;">
+                        <option value="CBE">CBE (Commercial Bank)</option>
+                        <option value="CBO">CBO (Coop Bank)</option>
+                        <option value="SINQEE">SINQEE Bank</option>
+                        <option value="TELEBIRR">TELEBIRR</option>
+                    </select>
+                </div>
+
+                <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY NOW</button>
+                
+                ${isAdminStatus ? `
+                    <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
+                        <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
+                        <button onclick="editProduct(${item.id})" style="color:blue; background:none; border:none; cursor:pointer; font-weight:bold;">Edit</button>
+                    </div>
+                ` : ''}
+            `;
+            container.appendChild(card);
+        });
     }
 
-    items.forEach((item, i) => {
-        const card = document.createElement('div');
-        card.className = 'shoe-card';
-        card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
-        card.style.opacity = '0';
+    // 3. Purchase Handler
+    async function handlePurchase(id, name, price) {
+        const bank = document.getElementById(`bank-${id}`).value;
+        const size = document.getElementById(`size-${id}`).value;
+
+        const fd = new FormData();
+        fd.append('action', 'place_order');
+        fd.append('item_name', name);
+        fd.append('price', price);
+        fd.append('size', size);
+        fd.append('bank', bank);
+
+        try {
+            const res = await fetch('index.php', { method: 'POST', body: fd });
+            const result = await res.json();
+            if(result.status === "success") {
+                showToast("Order Sent!", "Naol will contact you soon.");
+                addToOrderHistory(name, size, bank);
+            }
+        } catch (e) {
+            console.error("Purchase failed", e);
+        }
+    }
+
+    // Order history irratti dabaluu (Funktii of danda'e)
+    function addToOrderHistory(name, size, bank) {
+        orders++;
+        const badge = document.getElementById('order-badge');
+        if(badge) {
+            badge.innerText = orders;
+            badge.style.display = 'block';
+        }
         
-        card.innerHTML = `
-            <div class="shoe-img-box">
-                <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
-            </div>
-            <div style="margin-bottom:15px;">
-                <h3 style="font-weight:700;">${item.name}</h3>
-                <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
-            </div>
-            
-            <div style="margin-bottom:15px;">
-                <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
-                <select id="size-${item.id}" class="admin-field" style="margin:5px 0;">
-                    <option value="39">size 39</option>
-                    <option value="40">size 40</option>
-                    <option value="41">size 41</option>
-                    <option value="42">size 42</option>
-                    <option value="43">size 43</option>
-                    <option value="44">size 44</option>
-                </select>
-            </div>
+        const hist = document.getElementById('order-history-list');
+        if(hist) {
+            if(orders === 1) hist.innerHTML = '';
+            const div = document.createElement('div');
+            div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem;";
+            div.innerHTML = `<b>${name}</b><br>Size: ${size} | Bank: ${bank}<br><small style="color:green;">Status: Processing</small>`;
+            hist.prepend(div);
+        }
+    }
 
-            <div style="margin-bottom:15px;">
-                <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
-                <select id="bank-${item.id}" class="admin-field" style="margin:5px 0;">
-                    <option value="CBE">CBE</option>
-                    <option value="CBO">CBO</option>
-                    <option value="SINQEE">SINQEE</option>
-                    <option value="TELEBIR">TELEBIR</option>
-                </select>
-            </div>
-
-            <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY</button>
-            
-            ${isAdminStatus ? `
-                <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
-                    <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
-                    <button onclick="editProduct(${item.id})" style="color:blue; background:none; border:none; cursor:pointer; font-weight:bold;">Edit</button>
-                </div>
-            ` : ''}
-        `; // Asirratti mallattoo ` dabalamee jira
-        container.appendChild(card);
-    }); // Asirratti }) cufamee jira
-}
-    // 3. Admin Handlers
+    // --- Admin Handlers ---
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
         if(pass === "naol123") {
@@ -772,30 +817,28 @@ if ($success) {
         document.getElementById('login-link').style.display = 'none';
     }
 
-  // 1. Suuraa erguuf
-async function addShoe() {
-    const name = document.getElementById('shoeModel').value;
-    const price = document.getElementById('shoePrice').value;
-    const stock = document.getElementById('shoeStock').value;
-    const fileInput = document.getElementById('shoeFile');
-    
-    if(!name || !price || fileInput.files.length === 0) {
-        alert("Maaloo hunda guuti, suuraas filadhu!");
-        return;
+    async function addShoe() {
+        const name = document.getElementById('shoeModel').value;
+        const price = document.getElementById('shoePrice').value;
+        const stock = document.getElementById('shoeStock').value;
+        const fileInput = document.getElementById('shoeFile');
+        
+        if(!name || !price || fileInput.files.length === 0) {
+            alert("Maaloo hunda guuti, suuraas filadhu!");
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('add_shoe', '1');
+        fd.append('name', name);
+        fd.append('price', price);
+        fd.append('stock', stock);
+        fd.append('shoeFile', fileInput.files[0]);
+        fd.append('admin_key', "naol123"); 
+
+        await fetch('index.php', { method: 'POST', body: fd });
+        location.reload(); 
     }
-
-    const fd = new FormData();
-    fd.append('add_shoe', '1');
-    fd.append('name', name);
-    fd.append('price', price);
-    fd.append('stock', stock);
-    fd.append('shoeFile', fileInput.files[0]);
-    fd.append('admin_key', "naol123"); 
-
-    await fetch('index.php', { method: 'POST', body: fd });
-    location.reload(); // Suuraan akka mul'atuuf refresh godha
-}
-
 
     async function deleteProduct(id) {
         if(confirm("Confirm deletion?")) {
@@ -805,124 +848,33 @@ async function addShoe() {
         }
     }
 
-   // 2. FUNKTII RENDER (Dropdown qabu tokko qofa)
-    function renderShop(items) {
-        const container = document.getElementById('shop-display');
-        container.innerHTML = '';
-        
-        if(items.length === 0) {
-            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:100px; opacity:0.5;"><h3>No products found.</h3></div>`;
-            return;
-        }
-
-        items.forEach((item, i) => {
-            const card = document.createElement('div');
-            card.className = 'shoe-card';
-            card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
-            card.style.opacity = '0';
-            
-            card.innerHTML = `
-                <div class="shoe-img-box">
-                    <img src="${item.img_url}" onerror="this.src='https://via.placeholder.com/300x200?text=Sneaker'">
-                </div>
-                <div style="margin-bottom:15px;">
-                    <h3 style="font-weight:700;">${item.name}</h3>
-                    <p style="color:#B12704; font-size:1.4rem; font-weight:800;">ETB ${item.price}</p>
-                </div>
-                
-                <div style="margin-bottom:10px;">
-                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT SIZE</label>
-                    <select id="size-${item.id}" class="shop-select">
-                        <option value="39">size 39</option>
-                        <option value="40">size 40</option>
-                        <option value="41">size 41</option>
-                        <option value="42">size 42</option>
-                        <option value="43">size 43</option>
-                        <option value="44">size 44</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom:15px;">
-                    <label style="font-size:0.7rem; font-weight:800; color:#888;">SELECT BANK</label>
-                    <select id="bank-${item.id}" class="shop-select">
-                        <option value="CBE">CBE (Commercial Bank)</option>
-                        <option value="CBO">CBO (Coop Bank)</option>
-                        <option value="SINQEE">SINQEE Bank</option>
-                        <option value="TELEBIRR">TELEBIRR</option>
-                    </select>
-                </div>
-
-                <button class="btn-impulse" onclick="handlePurchase(${item.id}, '${item.name}', ${item.price})">BUY NOW</button>
-                
-                ${isAdminStatus ? `
-                    <div style="display:flex; justify-content:space-between; margin-top:15px; padding-top:10px; border-top:1px solid #eee;">
-                        <button onclick="deleteProduct(${item.id})" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
-                    </div>
-                ` : ''}
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    // 3. Purchase Handler
-    async function handlePurchase(id, name, price) {
-        const bank = document.getElementById(`bank-${id}`).value;
-        const size = document.getElementById(`size-${id}`).value;
-
-        const fd = new FormData();
-        fd.append('action', 'place_order');
-        fd.append('item_name', name);
-        fd.append('price', price);
-        fd.append('size', size);
-        fd.append('bank', bank);
-
-        const res = await fetch('index.php', { method: 'POST', body: fd });
-        const result = await res.json();
-        if(result.status === "success") {
-            showToast("Order Sent!", "Naol will contact you soon.");
-        }
-    }
-
-    // Order history irratti dabaluu
-    orders++;
-    document.getElementById('order-badge').innerText = orders;
-    document.getElementById('order-badge').style.display = 'block';
-    
-    const hist = document.getElementById('order-history-list');
-    if(orders === 1) hist.innerHTML = '';
-    
-    const div = document.createElement('div');
-    div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem;";
-    div.innerHTML = `<b>${name}</b><br>Size: ${size} | Bank: ${bank}<br><small style="color:green;">Status: Processing</small>`;
-    hist.prepend(div);
-}
-
     function notify(type, msg) {
         notifs++;
-        document.getElementById('notif-badge').innerText = notifs;
+        const badge = document.getElementById('notif-badge');
+        if(badge) badge.innerText = notifs;
+        
         const list = document.getElementById('notif-list');
-        const item = document.createElement('div');
-        item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem;";
-        item.innerHTML = `<strong>${type}</strong>: ${msg}`;
-        list.prepend(item);
+        if(list) {
+            const item = document.createElement('div');
+            item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem;";
+            item.innerHTML = `<strong>${type}</strong>: ${msg}`;
+            list.prepend(item);
+        }
     }
 
     function showToast(title, msg) {
         const t = document.getElementById('toast');
-        document.getElementById('toast-title').innerText = title;
-        document.getElementById('toast-msg').innerText = msg;
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 3000);
+        if(t) {
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
     }
 
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('mainContent').classList.toggle('shifted');
-    }
-
-    function toggleDropdown(id) {
-        const d = document.getElementById(id);
-        d.style.display = d.style.display === 'block' ? 'none' : 'block';
     }
 
     function searchShoes() {
@@ -933,17 +885,24 @@ async function addShoe() {
 
     function openSettings() {
         const s = document.getElementById('settings-panel');
-        s.style.display = s.style.display === 'none' ? 'block' : 'none';
+        if(s) s.style.display = s.style.display === 'none' ? 'block' : 'none';
     }
 
     window.onload = init;
 </script>
 
-
 <style>
+    /* Animation kee as jira */
     @keyframes popIn {
         from { opacity: 0; transform: scale(0.9); }
         to { opacity: 1; transform: scale(1); }
+    }
+    
+    .shop-select {
+        background-color: white;
+        color: #333;
+        font-weight: 600;
+        cursor: pointer;
     }
 </style>
 </body>
