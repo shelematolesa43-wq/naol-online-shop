@@ -791,57 +791,94 @@ if ($success) {
         });
     }
 
-    // 3. Purchase Handler
-    async function handlePurchase(id, name, price) {
-        const bank = document.getElementById(`bank-${id}`).value;
-        const size = document.getElementById(`size-${id}`).value;
+async function handlePurchase(id, name, price) {
+    const bank = document.getElementById(`bank-${id}`).value;
+    const size = document.getElementById(`size-${id}`).value;
 
-        const fd = new FormData();
-        fd.append('action', 'place_order');
-        fd.append('item_name', name);
-        fd.append('price', price);
-        fd.append('size', size);
-        fd.append('bank', bank);
+    const fd = new FormData();
+    fd.append('action', 'place_order');
+    fd.append('item_name', name);
+    fd.append('price', price);
+    fd.append('size', size);
+    fd.append('bank', bank);
 
-        try {
-            const res = await fetch('index.php', { method: 'POST', body: fd });
-            const result = await res.json();
-            if(result.status === "success") {
-                showToast("Order Sent!", "Naol will contact you soon.");
-                addToOrderHistory(name, size, bank);
-            }
-        } catch (e) {
-            console.error("Purchase failed", e);
-        }
-    }
-
-    // Order history irratti dabaluu (Funktii of danda'e)
-    function addToOrderHistory(name, size, bank) {
-        orders++;
-        const badge = document.getElementById('order-badge');
-        if(badge) {
-            badge.innerText = orders;
-            badge.style.display = 'block';
-        }
+    try {
+        const res = await fetch('index.php', { method: 'POST', body: fd });
+        const result = await res.json();
         
-        const hist = document.getElementById('order-history-list');
-        if(hist) {
-            if(orders === 1) hist.innerHTML = '';
-            const div = document.createElement('div');
-            div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem;";
-            div.innerHTML = `<b>${name}</b><br>Size: ${size} | Bank: ${bank}<br><small style="color:green;">Status: Processing</small>`;
-            hist.prepend(div);
-        }
-    }
-if(result.status === "success") {
+        if(result.status === "success") {
+            // 1. Show short pop-up message
             showToast("Order Sent!", "Naol will contact you soon.");
             
-            // Notification lakkoofsa (🛎️) akka dabaluuf kana dabaladhu:
+            // 2. Update the Notification Bell (🛎️) - This was missing!
             notify("NEW ORDER", `You ordered ${name} (Size: ${size}).`);
 
-            // Kun kan kanaan dura jiru dha (🛒)
+            // 3. Update the Order Cart (🛒)
             addToOrderHistory(name, size, bank);
         }
+    } catch (e) {
+        console.error("Purchase failed", e);
+        notify("ERROR", "Something went wrong with your order.");
+    }
+}
+
+/**
+ * Function to update the Bell (🛎️) notification
+ */
+function notify(type, msg) {
+    notifs++;
+    const badge = document.getElementById('notif-badge');
+    if(badge) {
+        badge.innerText = notifs;
+        badge.style.display = 'block'; // Make badge visible
+    }
+    
+    const list = document.getElementById('notif-list');
+    if(list) {
+        const item = document.createElement('div');
+        item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem; color:black; border-left:4px solid #007bff;";
+        item.innerHTML = `<strong>${type}</strong>: ${msg}`;
+        list.prepend(item);
+    }
+}
+
+/**
+ * Function to update the Cart (🛒) history
+ */
+function addToOrderHistory(name, size, bank) {
+    orders++;
+    const badge = document.getElementById('order-badge');
+    if(badge) {
+        badge.innerText = orders;
+        badge.style.display = 'block';
+    }
+    
+    const hist = document.getElementById('order-history-list');
+    if(hist) {
+        if(orders === 1) hist.innerHTML = ''; // Clear "No orders" message
+        const div = document.createElement('div');
+        div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem; color:black;";
+        div.innerHTML = `
+            <b>${name}</b><br>
+            Size: ${size} | Bank: ${bank}<br>
+            <small style="color:green;">Status: Processing</small>
+        `;
+        hist.prepend(div);
+    }
+}
+
+/**
+ * Function to show Toast notification
+ */
+function showToast(title, msg) {
+    const t = document.getElementById('toast');
+    if(t) {
+        document.getElementById('toast-title').innerText = title;
+        document.getElementById('toast-msg').innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 3000);
+    }
+}
     // --- Admin Handlers ---
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
