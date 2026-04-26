@@ -543,21 +543,25 @@ if ($success) {
             animation: slideIn 0.5s ease;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.notif-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    display: none; /* Jalqaba irratti ni dhokata */
+    z-index: 1000;
+    padding: 15px;
+    color: #333;
+}
 
-        .notif-dropdown { 
-            position: absolute; 
-            top: 60px; 
-            right: 0; 
-            background: white; 
-            width: 340px; 
-            border-radius: 15px; 
-            display: none; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.25); 
-            padding: 20px; 
-            z-index: 2000; 
-            color: black;
-            border: 1px solid #eee;
-        }
+.history-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
 
         .admin-field { 
             width: 100%; 
