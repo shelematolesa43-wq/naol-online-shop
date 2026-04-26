@@ -833,7 +833,15 @@ if ($success) {
             hist.prepend(div);
         }
     }
+if(result.status === "success") {
+            showToast("Order Sent!", "Naol will contact you soon.");
+            
+            // Notification lakkoofsa (🛎️) akka dabaluuf kana dabaladhu:
+            notify("NEW ORDER", `You ordered ${name} (Size: ${size}).`);
 
+            // Kun kan kanaan dura jiru dha (🛒)
+            addToOrderHistory(name, size, bank);
+        }
     // --- Admin Handlers ---
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
