@@ -596,40 +596,45 @@ if ($success) {
 </div>
 
 <div class="main-content" id="mainContent">
-    <nav>
-        <div style="display:flex; align-items:center; gap:20px;">
-            <span style="font-size:2rem; cursor:pointer;" onclick="toggleSidebar()">☰</span>
-            <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">NAOL</h1>
-        </div>
-        <div style="flex-grow: 1; max-width: 500px; margin: 0 30px; display: flex;">
-            <input type="text" id="search-input" style="width:100%; padding:12px 20px; border-radius:8px 0 0 8px; border:none;" placeholder="Search for shoes..." onkeyup="searchShoes()">
-            <button style="background:var(--cta); border:none; padding:0 20px; border-radius:0 8px 8px 0; cursor:pointer;">🔍</button>
-        </div>
-        <div style="display:flex; gap:30px; align-items:center;">
-            <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
-                <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
-                <strong style="font-size:0.9rem;">Orders</strong>
-               🛒 <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-10px; right:-15px; display:none;">0</span>
-                <div class="notif-dropdown" id="order-dropdown">
-                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Order History</h4>
-                    <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto;">
-                        <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-icon" onclick="toggleDropdown('notif-dropdown')">
+ <nav>
+    <div style="display:flex; align-items:center; gap:20px;">
+        <span style="font-size:2rem; cursor:pointer;" onclick="toggleSidebar()">☰</span>
+        <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">NAOL</h1>
+    </div>
 
-   <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
-                <span style="font-size:1.6rem;">🛎️</span>
-                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem;
-                    position:absolute; top:0; right:-5px;">0</span>
-                <div class="notif-dropdown" id="notif-dropdown">
-                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px;">Notifications</h4>
-                    <div id="notif-list" style="margin-top:10px;"></div>
+    <div style="flex-grow: 1; max-width: 500px; margin: 0 30px; display: flex;">
+        <input type="text" id="search-input" style="width:100%; padding:12px 20px; border-radius:8px 0 0 8px; border:none;" placeholder="Search for shoes..." onkeyup="searchShoes()">
+        <button style="background:var(--cta); border:none; padding:0 20px; border-radius:0 8px 8px 0; cursor:pointer;">🔍</button>
+    </div>
+
+    <div style="display:flex; gap:30px; align-items:center;">
+        
+        <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
+            <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
+            <strong style="font-size:0.9rem;">Orders</strong>
+            <span style="font-size:1.6rem;">🛒</span>
+            <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-5px; right:-10px; display:none;">0</span>
+            
+            <div class="notif-dropdown" id="order-dropdown">
+                <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Order History</h4>
+                <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto; color:black;">
+                    <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
                 </div>
             </div>
         </div>
-    </nav>
+
+        <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
+            <span style="font-size:1.6rem;">🛎️</span>
+            <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px; display:none;">0</span>
+            
+            <div class="notif-dropdown" id="notif-dropdown">
+                <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Notifications</h4>
+                <div id="notif-list" style="margin-top:10px; max-height: 300px; overflow-y:auto; color:black;"></div>
+            </div>
+        </div>
+
+    </div>
+</nav>
 
     <div class="hero-banner">
         <div class="hero-overlay"></div>
