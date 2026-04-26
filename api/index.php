@@ -618,11 +618,10 @@ if ($success) {
                 </div>
             </div>
             <div class="nav-icon" onclick="toggleDropdown('notif-dropdown')">
-    🛎️ <span id="notif-badge">4</span>
-</div>
+
 
 <div class="nav-icon" onclick="toggleDropdown('order-dropdown')">
-    🛒 <span id="order-badge">4</span>
+    🛒 <span id="order-badge">0</span>
 </div>
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
                 <span style="font-size:1.6rem;">🛎️</span>
