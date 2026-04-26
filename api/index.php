@@ -310,20 +310,35 @@ if ($success) {
         }
 
         /* Sidebar & Navigation */
-        .sidebar { 
-            width: var(--sidebar-width); 
-            background: var(--nav-bg); 
-            height: 100vh; 
-            position: fixed; 
-            left: calc(var(--sidebar-width) * -1); 
-            top: 0; 
-            padding: 2.5rem 1.5rem; 
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-            z-index: 2001; 
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-        }
+  /* Sidebar menu akka hunda gubbaa dhufuuf */
+.sidebar { 
+    width: var(--sidebar-width); 
+    background: var(--nav-bg); 
+    height: 100vh; 
+    position: fixed; 
+    left: -280px; /* Bakka kana sirreessineerra */
+    top: 0; 
+    padding: 2.5rem 1.5rem; 
+    transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+    z-index: 9999 !important; /* Baay'ee barbaachisaadha */
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.sidebar.active { 
+    left: 0 !important; 
+    box-shadow: 15px 0 50px rgba(0,0,0,0.7); 
+}
+
+/* Hamburger icon akka tuqamuuf */
+.menu-icon {
+    font-size: 2rem; 
+    cursor: pointer; 
+    z-index: 10001; 
+    position: relative;
+    padding: 5px;
+}
         .sidebar.active { left: 0; box-shadow: 15px 0 50px rgba(0,0,0,0.7); }
         
         .nav-links { list-style: none; margin-top: 30px; }
@@ -872,11 +887,27 @@ if ($success) {
         }
     }
 
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('mainContent').classList.toggle('shifted');
+// Sidebar banuuf fi cufuuf
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+        // Main content yoo shifted gochuu barbaadde
+        if (mainContent) {
+            mainContent.classList.toggle('shifted');
+        }
     }
+}
 
+// Yoo sidebar alatti tuqan akka cufamuuf
+window.onclick = function(event) {
+    const sidebar = document.getElementById('sidebar');
+    if (event.target == sidebar) {
+        sidebar.classList.remove('active');
+    }
+}
     function searchShoes() {
         const q = document.getElementById('search-input').value.toLowerCase();
         const filtered = allShoes.filter(s => s.name.toLowerCase().includes(q));
