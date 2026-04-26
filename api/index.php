@@ -886,30 +886,36 @@ if ($success) {
         }
     }
 
-    function notify(type, msg) {
-        notifs++;
-        const badge = document.getElementById('notif-badge');
-        if(badge) badge.innerText = notifs;
+function notify(type, msg) {
+    notifs++;
+    const badge = document.getElementById('notif-badge');
+    if(badge) {
+        badge.innerText = notifs;
+        badge.style.display = 'inline-block'; // Akka mul'atu godha
+    }
+    
+    const list = document.getElementById('notif-list');
+    if(list) {
+        const item = document.createElement('div');
+        item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem; border-left:4px solid #007bff;";
+        item.innerHTML = `<strong>${type}</strong>: ${msg}`;
+        list.prepend(item);
+    }
+}
+
+function showToast(title, msg) {
+    const t = document.getElementById('toast');
+    if(t) {
+        document.getElementById('toast-title').innerText = title;
+        document.getElementById('toast-msg').innerText = msg;
+        t.style.display = 'block';
         
-        const list = document.getElementById('notif-list');
-        if(list) {
-            const item = document.createElement('div');
-            item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem;";
-            item.innerHTML = `<strong>${type}</strong>: ${msg}`;
-            list.prepend(item);
-        }
+        // Erga sekondii 3 booda akka dhokatu
+        setTimeout(() => {
+            t.style.display = 'none';
+        }, 3000);
     }
-
-    function showToast(title, msg) {
-        const t = document.getElementById('toast');
-        if(t) {
-            document.getElementById('toast-title').innerText = title;
-            document.getElementById('toast-msg').innerText = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
-    }
-
+}
 // Sidebar banuuf fi cufuuf
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
