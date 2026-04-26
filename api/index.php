@@ -240,6 +240,33 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
     header("Location: index.php");
     exit;
 }
+        // --- DATABASE TABLES UUMUUF ---
+if ($success) {
+    // ... koodii table uumuuf ati qabdu jira ...
+
+    // --- SHOES 12 KALLAATTIIN GALCHUUF ---
+    $google_shoes = [
+        ['name' => 'Nike Air Force 1', 'price' => 4500, 'url' => 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=1000'],
+        ['name' => 'Adidas Superstar', 'price' => 3800, 'url' => 'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?q=80&w=1000'],
+        ['name' => 'Jordan 4 Retro', 'price' => 6200, 'url' => 'https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=1000'],
+        ['name' => 'Puma RS-X', 'price' => 3200, 'url' => 'https://images.unsplash.com/photo-1584735175315-9d581f7a06c9?q=80&w=1000'],
+        ['name' => 'New Balance 550', 'price' => 4100, 'url' => 'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=1000'],
+        ['name' => 'Converse Chuck Taylor', 'price' => 2500, 'url' => 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1000'],
+        ['name' => 'Vans Old Skool', 'price' => 2800, 'url' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1000'],
+        ['name' => 'Reebok Classic', 'price' => 3000, 'url' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000'],
+        ['name' => 'Nike Dunk Low', 'price' => 5000, 'url' => 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1000'],
+        ['name' => 'Yeezy Boost 350', 'price' => 8500, 'url' => 'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?q=80&w=1000'],
+        ['name' => 'Balenciaga Speed', 'price' => 9500, 'url' => 'https://images.unsplash.com/photo-1595341888016-a392ef81b7de?q=80&w=1000'],
+        ['name' => 'Asics Gel-Kayano', 'price' => 4200, 'url' => 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1000']
+    ];
+
+    foreach ($google_shoes as $shoe) {
+        // 'INSERT IGNORE' yoo jenne data dachaa (duplicate) nuuf hin galchu
+        $stmt = $conn->prepare("INSERT IGNORE INTO products (name, price, img_url) VALUES (?, ?, ?)");
+        $stmt->bind_param("sds", $shoe['name'], $shoe['price'], $shoe['url']);
+        $stmt->execute();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
