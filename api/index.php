@@ -613,6 +613,13 @@ if ($success) {
                     </div>
                 </div>
             </div>
+            <div class="nav-icon" onclick="toggleDropdown('notif-dropdown')">
+    🛎️ <span id="notif-badge">4</span>
+</div>
+
+<div class="nav-icon" onclick="toggleDropdown('order-dropdown')">
+    🛒 <span id="order-badge">4</span>
+</div>
             <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
                 <span style="font-size:1.6rem;">🛎️</span>
                 <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem;
@@ -1009,7 +1016,22 @@ window.onclick = function(event) {
         const filtered = allShoes.filter(s => s.name.toLowerCase().includes(q));
         renderShop(filtered);
     }
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    
+    // Dropdown-oota biroo cufi
+    const allDropdowns = document.querySelectorAll('.notif-dropdown');
+    allDropdowns.forEach(d => {
+        if (d.id !== id) d.style.display = 'none';
+    });
 
+    // Isa barbaadame bani ykn cufi
+    if (dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+    } else {
+        dropdown.style.display = 'block';
+    }
+}
     function openSettings() {
         const s = document.getElementById('settings-panel');
         if(s) s.style.display = s.style.display === 'none' ? 'block' : 'none';
