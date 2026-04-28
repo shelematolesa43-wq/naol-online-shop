@@ -1007,6 +1007,45 @@ if ($success) {
         const sidebar = document.getElementById('sidebar');
         if (event.target == sidebar) sidebar.classList.remove('active');
     }
+    function kaffaltiiChapa(orderData) {
+    fetch("https://api.chapa.co/v1/transaction/initialize", {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer YOUR_ACTUAL_SECRET_KEY", // Put your real key here
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "amount": orderData.price,
+            "currency": "ETB",
+            "email": "customer@gmail.com",
+            "first_name": "Customer",
+            "tx_ref": "tyson-" + Date.now(), // Unique reference
+            "callback_url": "https://yourwebsite.com/success",
+            "customization": {
+                "title": "TYSON SHOES",
+                "description": "Buying " + orderData.model
+            }
+        })
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            // This will tell you EXACTLY what Chapa didn't like
+            console.error("Chapa Error:", data);
+            throw new Error(data.message || "API Request Failed");
+        }
+        return data;
+    })
+    .then(data => {
+        if(data.status === "success") {
+            window.location.href = data.data.checkout_url;
+        }
+    })
+    .catch(error => {
+        console.error("Order Error:", error);
+        addNotification("ERROR: " + error.message);
+    });
+}
 </script>
 
 <style>
