@@ -191,16 +191,25 @@ if (isset($_POST['update_settings']) && isAdmin()) {
     exit;
 }
 
-// 2.8 Product Management: Delete
-if (isset($_GET['delete_id'])) {
-    if (!isset($_GET['key']) || $_GET['key'] !== "naol123") {
-        header('HTTP/1.1 403 Forbidden');
-        exit("Unauthorized");
+// --- ADMIN OPERATIONS ---
+// 1. Delete Product
+if (isset($_GET['delete_id']) && isset($_GET['key']) && $_GET['key'] === "naol123") {
+    $id = intval($_GET['delete_id']);
+    $conn->query("DELETE FROM products WHERE id = $id");
+    header("Location: index.php?msg=Deleted");
+    exit;
+}
+
+// 2. Change Admin Password (POST request)
+if (isset($_POST['action']) && $_POST['action'] === 'change_pass' && isset($_POST['new_pass'])) {
+    $new_hash = password_hash($_POST['new_pass'], PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("UPDATE admin_users SET password_hash = ? WHERE username = 'admin'");
+    $stmt->bind_param("s", $new_hash);
+    if($stmt->execute()) {
+        echo json_encode(["status" => "success"]);
+    } else {
+        echo json_encode(["status" => "error"]);
     }
-    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
-    $stmt->bind_param("i", $_GET['delete_id']);
-    $stmt->execute();
-    header("Location: index.php");
     exit;
 }
 
@@ -714,7 +723,6 @@ if ($success) {
         &copy; 2026 TYSON SHOES. All Rights Reserved.
     </div>
 </footer>
-
 <script>
     // --- JAVASCRIPT APP LOGIC ---
     let isAdminStatus = false;
@@ -723,7 +731,7 @@ if ($success) {
     let notifs = 0;
     let orders = 0;
 
-    // 1. Initial Load
+    // 1. Initial Load - Ragaa jalqabaa fiduuf
     async function init() {
         try {
             const res = await fetch('index.php?action=get_init');
@@ -747,7 +755,7 @@ if ($success) {
         }
     }
 
-    // 2. Render Products (Bakka tokkotti qofa barreeffame)
+    // 2. Render Products - Meeshaalee suuraa fi gatii wajjin baasuu
     function renderShop(items) {
         const container = document.getElementById('shop-display');
         container.innerHTML = '';
@@ -760,7 +768,7 @@ if ($success) {
         items.forEach((item, i) => {
             const card = document.createElement('div');
             card.className = 'shoe-card';
-            // Animation kee as jira - hin tuqamne
+            // Animation popIn kallaattiin asitti hojjeta
             card.style.animation = `popIn 0.5s ease forwards ${i * 0.1}s`;
             card.style.opacity = '0';
             
@@ -808,102 +816,41 @@ if ($success) {
         });
     }
 
-async function handlePurchase(id, name, price) {
-    const bank = document.getElementById(`bank-${id}`).value;
-    const size = document.getElementById(`size-${id}`).value;
+    // 3. Purchase Logic - Bittaa raawwachuuf
+    async function handlePurchase(id, name, price) {
+        const bank = document.getElementById(`bank-${id}`).value;
+        const size = document.getElementById(`size-${id}`).value;
 
-    const fd = new FormData();
-    fd.append('action', 'place_order');
-    fd.append('item_name', name);
-    fd.append('price', price);
-    fd.append('size', size);
-    fd.append('bank', bank);
+        const fd = new FormData();
+        fd.append('action', 'place_order');
+        fd.append('item_name', name);
+        fd.append('price', price);
+        fd.append('size', size);
+        fd.append('bank', bank);
 
-    try {
-        const res = await fetch('index.php', { method: 'POST', body: fd });
-        const result = await res.json();
-        
-        if(result.status === "success") {
-            // 1. Show short pop-up message
-            showToast("Order Sent!", "TYSON SHOES will contact you soon.");
+        try {
+            const res = await fetch('index.php', { method: 'POST', body: fd });
+            const result = await res.json();
             
-            // 2. Update the Notification Bell (🛎️) - This was missing!
-            notify("NEW ORDER", `You ordered ${name} (Size: ${size}).`);
-
-            // 3. Update the Order Cart (🛒)
-            addToOrderHistory(name, size, bank);
+            if(result.status === "success") {
+                showToast("Order Sent!", "TYSON SHOES will contact you soon.");
+                notify("NEW ORDER", `You ordered ${name} (Size: ${size}).`);
+                addToOrderHistory(name, size, bank);
+            }
+        } catch (e) {
+            console.error("Purchase failed", e);
+            notify("ERROR", "Something went wrong with your order.");
         }
-    } catch (e) {
-        console.error("Purchase failed", e);
-        notify("ERROR", "Something went wrong with your order.");
     }
-}
 
-/**
- * Function to update the Bell (🛎️) notification
- */
-function notify(type, msg) {
-    notifs++;
-    const badge = document.getElementById('notif-badge');
-    if(badge) {
-        badge.innerText = notifs;
-        badge.style.display = 'block'; // Make badge visible
-    }
-    
-    const list = document.getElementById('notif-list');
-    if(list) {
-        const item = document.createElement('div');
-        item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem; color:black; border-left:4px solid #007bff;";
-        item.innerHTML = `<strong>${type}</strong>: ${msg}`;
-        list.prepend(item);
-    }
-}
-
-/**
- * Function to update the Cart (🛒) history
- */
-function addToOrderHistory(name, size, bank) {
-    orders++;
-    const badge = document.getElementById('order-badge');
-    if(badge) {
-        badge.innerText = orders;
-        badge.style.display = 'block';
-    }
-    
-    const hist = document.getElementById('order-history-list');
-    if(hist) {
-        if(orders === 1) hist.innerHTML = ''; // Clear "No orders" message
-        const div = document.createElement('div');
-        div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem; color:black;";
-        div.innerHTML = `
-            <b>${name}</b><br>
-            Size: ${size} | Bank: ${bank}<br>
-            <small style="color:green;">Status: Processing</small>
-        `;
-        hist.prepend(div);
-    }
-}
-
-/**
- * Function to show Toast notification
- */
-function showToast(title, msg) {
-    const t = document.getElementById('toast');
-    if(t) {
-        document.getElementById('toast-title').innerText = title;
-        document.getElementById('toast-msg').innerText = msg;
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 3000);
-    }
-}
-    // --- Admin Handlers ---
+    // 4. Admin Operations - Login, Delete, fi Password
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
         if(pass === "naol123") {
             isAdminStatus = true;
             currentKey = pass;
             showAdminUI();
-            renderShop(allShoes);
+            renderShop(allShoes); // Kuni 'Delete' button akka mul'atu godha
             notify("System", "Admin privileges granted.");
         } else if(pass) {
             alert("Unauthorized access attempt.");
@@ -915,6 +862,48 @@ function showToast(title, msg) {
         document.getElementById('setting-link').style.display = 'block';
         document.getElementById('logout-link').style.display = 'block';
         document.getElementById('login-link').style.display = 'none';
+    }
+
+    async function deleteProduct(id) {
+        if(confirm("Shoe kana balleessuu barbaadduu?")) {
+            try {
+                // Key kallaattiin asitti ergama
+                const res = await fetch(`index.php?delete_id=${id}&key=${currentKey}`);
+                if(res.ok) {
+                    notify("Inventory", "Product removed successfully.");
+                    // List deebisanii fiduuf
+                    const refreshRes = await fetch('index.php?action=get_init');
+                    const data = await refreshRes.json();
+                    allShoes = data.products;
+                    renderShop(allShoes);
+                }
+            } catch (e) {
+                alert("Balleessuu hin dandeenye!");
+            }
+        }
+    }
+
+    async function saveNewPassword() {
+        const newPass = document.getElementById('admin-new-password').value;
+        if(!newPass) return alert("Maaloo password haaraa galchi!");
+
+        const fd = new FormData();
+        fd.append('action', 'change_pass');
+        fd.append('new_pass', newPass);
+
+        try {
+            const res = await fetch('index.php', { method: 'POST', body: fd });
+            const result = await res.json();
+
+            if(result.status === "success") {
+                showToast("Success", "Password milkiin jijjiirameera!");
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                alert("Password jijjiiruun hin danda'amne!");
+            }
+        } catch (e) {
+            console.error("Change pass failed", e);
+        }
     }
 
     async function addShoe() {
@@ -934,120 +923,106 @@ function showToast(title, msg) {
         fd.append('price', price);
         fd.append('stock', stock);
         fd.append('shoeFile', fileInput.files[0]);
-        fd.append('admin_key', "naol123"); 
+        fd.append('admin_key', currentKey); 
 
         await fetch('index.php', { method: 'POST', body: fd });
         location.reload(); 
     }
 
-    async function deleteProduct(id) {
-        if(confirm("Confirm deletion?")) {
-            await fetch(`index.php?delete_id=${id}&key=${currentKey}`);
-            init();
-            notify("Inventory", "Product removed.");
+    // 5. Notifications & UI Helpers
+    function notify(type, msg) {
+        notifs++;
+        const badge = document.getElementById('notif-badge');
+        if(badge) {
+            badge.innerText = notifs;
+            badge.style.display = 'inline-block';
         }
-    }
-
-function notify(type, msg) {
-    notifs++;
-    const badge = document.getElementById('notif-badge');
-    if(badge) {
-        badge.innerText = notifs;
-        badge.style.display = 'inline-block'; // Akka mul'atu godha
-    }
-    
-    const list = document.getElementById('notif-list');
-    if(list) {
-        const item = document.createElement('div');
-        item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem; border-left:4px solid #007bff;";
-        item.innerHTML = `<strong>${type}</strong>: ${msg}`;
-        list.prepend(item);
-    }
-}
-
-function showToast(title, msg) {
-    const t = document.getElementById('toast');
-    if(t) {
-        document.getElementById('toast-title').innerText = title;
-        document.getElementById('toast-msg').innerText = msg;
-        t.style.display = 'block';
         
-        // Erga sekondii 3 booda akka dhokatu
-        setTimeout(() => {
-            t.style.display = 'none';
-        }, 3000);
-    }
-}
-// Sidebar banuuf fi cufuuf
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('mainContent');
-    
-    if (sidebar) {
-        sidebar.classList.toggle('active');
-        // Main content yoo shifted gochuu barbaadde
-        if (mainContent) {
-            mainContent.classList.toggle('shifted');
+        const list = document.getElementById('notif-list');
+        if(list) {
+            const item = document.createElement('div');
+            item.style = "padding:10px; background:#f0f7ff; margin-bottom:5px; border-radius:5px; font-size:0.8rem; border-left:4px solid #007bff; color: black;";
+            item.innerHTML = `<strong>${type}</strong>: ${msg}`;
+            list.prepend(item);
         }
     }
-}
-    // Funktii kanaan Naol order haaraa ilaaluu danda'a
-async function checkNewOrders() {
-    if(!isAdminStatus) return; // Yoo admin ta'e qofa
 
-    try {
-        const res = await fetch('index.php?action=get_orders'); // API kana PHP keessatti dabalachuu qabda
-        const orders = await res.json();
+    function addToOrderHistory(name, size, bank) {
+        orders++;
+        const badge = document.getElementById('order-badge');
+        if(badge) {
+            badge.innerText = orders;
+            badge.style.display = 'block';
+        }
         
-        if(orders.length > 0) {
-            notify("ADMIN ALERT", `${orders.length} orders haaraa dhufeera!`);
-            // Order badge irratti lakkoofsa ni daballa
-            document.getElementById('notif-badge').innerText = orders.length;
+        const hist = document.getElementById('order-history-list');
+        if(hist) {
+            if(orders === 1) hist.innerHTML = '';
+            const div = document.createElement('div');
+            div.style = "padding:10px; border-bottom:1px solid #eee; font-size:0.85rem; color:black;";
+            div.innerHTML = `
+                <b>${name}</b><br>
+                Size: ${size} | Bank: ${bank}<br>
+                <small style="color:green;">Status: Processing</small>
+            `;
+            hist.prepend(div);
         }
-    } catch (e) {
-        console.log("Admin sync failed");
     }
-}
 
-// Sekondii 30 30n akka check godhuuf
-if(isAdminStatus) {
-    setInterval(checkNewOrders, 30000);
-}
+    function showToast(title, msg) {
+        const t = document.getElementById('toast');
+        if(t) {
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+    }
 
-// Yoo sidebar alatti tuqan akka cufamuuf
-window.onclick = function(event) {
-    const sidebar = document.getElementById('sidebar');
-    if (event.target == sidebar) {
-        sidebar.classList.remove('active');
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.classList.toggle('active');
     }
-}
-    function searchShoes() {
-        const q = document.getElementById('search-input').value.toLowerCase();
-        const filtered = allShoes.filter(s => s.name.toLowerCase().includes(q));
-        renderShop(filtered);
-    }
-function toggleDropdown(id) {
-    const dropdown = document.getElementById(id);
-    
-    // Dropdown-oota biroo cufi
-    const allDropdowns = document.querySelectorAll('.notif-dropdown');
-    allDropdowns.forEach(d => {
-        if (d.id !== id) d.style.display = 'none';
-    });
 
-    // Isa barbaadame bani ykn cufi
-    if (dropdown.style.display === 'block') {
-        dropdown.style.display = 'none';
-    } else {
-        dropdown.style.display = 'block';
+    function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        const allDropdowns = document.querySelectorAll('.notif-dropdown');
+        allDropdowns.forEach(d => { if (d.id !== id) d.style.display = 'none'; });
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
     }
-}
+
     function openSettings() {
         const s = document.getElementById('settings-panel');
         if(s) s.style.display = s.style.display === 'none' ? 'block' : 'none';
     }
 
+    function searchShoes() {
+        const q = document.getElementById('search-input').value.toLowerCase();
+        const filtered = allShoes.filter(s => s.name.toLowerCase().includes(q));
+        renderShop(filtered);
+    }
+
+    // Syncing new orders for admin
+    async function checkNewOrders() {
+        if(!isAdminStatus) return;
+        try {
+            const res = await fetch('index.php?action=get_orders');
+            const data = await res.json();
+            if(data.length > 0) {
+                notify("ADMIN ALERT", `${data.length} orders haaraa dhufeera!`);
+            }
+        } catch (e) { console.log("Sync failed"); }
+    }
+
+    if(isAdminStatus) setInterval(checkNewOrders, 30000);
+
     window.onload = init;
+
+    // Closing sidebar on outside click
+    window.onclick = function(event) {
+        const sidebar = document.getElementById('sidebar');
+        if (event.target == sidebar) sidebar.classList.remove('active');
+    }
 </script>
 
 <style>
@@ -1056,7 +1031,16 @@ function toggleDropdown(id) {
         from { opacity: 0; transform: scale(0.9); }
         to { opacity: 1; transform: scale(1); }
     }
-    
+    function toggleAdmin() {
+    const pass = prompt("Enter Admin Access Key:");
+    if(pass === "naol123") {
+        isAdminStatus = true;
+        currentKey = pass;
+        showAdminUI();
+        renderShop(allShoes); // <--- Kuni dirqama! Table-ni akka deebi'ee uumamuuf
+        notify("System", "Admin privileges granted.");
+    }
+}
     .shop-select {
         background-color: white;
         color: #333;
