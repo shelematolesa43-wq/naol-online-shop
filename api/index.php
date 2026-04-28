@@ -1,34 +1,25 @@
 <?php
-// --- DATABASE CONFIGURATION
-session_start(); // Kana dabaladhu!
+session_start();
 
 $host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
 $user = "avnadmin";
-// Password kee mallattoo ' ' (single quotes) qofa keessa galchi
 $pass = 'AVNS__vcyJnLCW7tPcJRITMN'; 
 $db   = "defaultdb";
 $port = 23454;
 
 $conn = mysqli_init();
 
-// Aiven SSL REQUIRED waan ta'eef kana dabalun dirqama
-mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
+// SSL dabaladhu
+mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, FALSE);
 
-// Sarara 15: mysqli_real_connect
-$success = mysqli_real_connect(
-    $conn, 
-    $host, 
-    $user, 
-    $pass, 
-    $db, 
-    $port, 
-    NULL, 
-    MYSQLI_CLIENT_SSL
-);
+// Connection
+$success = mysqli_real_connect($conn, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$success) {
-    die("Database Connection Failed: " . mysqli_connect_error());
+    // Dogoggora DNS yoo ta'e asitti siif hima
+    die("Connection Error: " . mysqli_connect_error());
 }
+
 // --- DATABASE TABLES UUMUUF (KANA DABALADHU) ---
 if ($success) {
     // 1. Table products
