@@ -617,45 +617,45 @@ if ($success) {
 </div>
 
 <div class="main-content" id="mainContent">
- <nav>
-    <div style="display:flex; align-items:center; gap:20px;">
-        <span style="font-size:2rem; cursor:pointer;" onclick="toggleSidebar()">☰</span>
-        <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">TYSON SHOES</h1>
-    </div>
+    <nav>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <span style="font-size:2rem; cursor:pointer;" onclick="toggleSidebar()">☰</span>
+            <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">TYSON SHOES</h1>
+        </div>
 
-    <div style="flex-grow: 1; max-width: 500px; margin: 0 30px; display: flex;">
-        <input type="text" id="search-input" style="width:100%; padding:12px 20px; border-radius:8px 0 0 8px; border:none;" placeholder="Search for shoes..." onkeyup="searchShoes()">
-        <button style="background:var(--cta); border:none; padding:0 20px; border-radius:0 8px 8px 0; cursor:pointer;">🔍</button>
-    </div>
+        <div style="flex-grow: 1; max-width: 500px; margin: 0 30px; display: flex;">
+            <input type="text" id="search-input" style="width:100%; padding:12px 20px; border-radius:8px 0 0 8px; border:none;" placeholder="Search for shoes..." onkeyup="searchShoes()">
+            <button style="background:var(--cta); border:none; padding:0 20px; border-radius:0 8px 8px 0; cursor:pointer;">🔍</button>
+        </div>
 
-    <div style="display:flex; gap:30px; align-items:center;">
-        
-        <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
-            <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
-            <strong style="font-size:0.9rem;">Orders</strong>
-            <span style="font-size:1.6rem;">🛒</span>
-            <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-5px; right:-10px; display:none;">0</span>
+        <div style="display:flex; gap:30px; align-items:center;">
             
-            <div class="notif-dropdown" id="order-dropdown">
-                <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Order History</h4>
-                <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto; color:black;">
-                    <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
+            <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('order-dropdown')">
+                <small style="display:block; opacity:0.7; font-size:0.7rem;">Your</small>
+                <strong style="font-size:0.9rem;">Orders</strong>
+                <span style="font-size:1.6rem;">🛒</span>
+                <span id="order-badge" style="background:var(--cta); color:black; padding:2px 6px; border-radius:50%; font-size:0.7rem; position:absolute; top:-5px; right:-10px; display:none;">0</span>
+                
+                <div class="notif-dropdown" id="order-dropdown">
+                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Order History</h4>
+                    <div id="order-history-list" style="margin-top:15px; max-height: 300px; overflow-y:auto; color:black;">
+                        <p style="text-align:center; color:#999; font-size:0.8rem;">No orders yet.</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
-            <span style="font-size:1.6rem;">🛎️</span>
-            <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px; display:none;">0</span>
-            
-            <div class="notif-dropdown" id="notif-dropdown">
-                <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Notifications</h4>
-                <div id="notif-list" style="margin-top:10px; max-height: 300px; overflow-y:auto; color:black;"></div>
+            <div style="cursor:pointer; position:relative;" onclick="toggleDropdown('notif-dropdown')">
+                <span style="font-size:1.6rem;">🛎️</span>
+                <span id="notif-badge" style="background:var(--cta); color:black; padding:2px 7px; border-radius:50%; font-size:0.7rem; position:absolute; top:0; right:-5px; display:none;">0</span>
+                
+                <div class="notif-dropdown" id="notif-dropdown">
+                    <h4 style="border-bottom: 2px solid var(--cta); padding-bottom: 10px; color:black;">Notifications</h4>
+                    <div id="notif-list" style="margin-top:10px; max-height: 300px; overflow-y:auto; color:black;"></div>
+                </div>
             </div>
-        </div>
 
-    </div>
-</nav>
+        </div>
+    </nav>
 
     <div class="hero-banner">
         <div class="hero-overlay"></div>
@@ -680,7 +680,8 @@ if ($success) {
             </div>
             <button class="btn-impulse" onclick="saveSettings()" style="width:200px; margin-top:20px;">Update Store</button>
         </div>
-
+    </div>
+</div>
        <div id="admin-panel" style="display:none; background:white; padding:30px; border-radius:15px; margin-bottom:30px; border-left:10px solid var(--cta); box-shadow: var(--shadow);">
     <h3>Add New Inventory</h3>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-top:15px;">
@@ -730,7 +731,7 @@ if ($success) {
     </div>
 </footer>
 <script>
-    // --- JAVASCRIPT APP LOGIC ---
+    // --- JAVASCRIPT APP LOGIC (GUUTUU ISAA) ---
     let isAdminStatus = false;
     let currentKey = "";
     let allShoes = [];
@@ -738,39 +739,37 @@ if ($success) {
     let orders = 0;
 
     // 1. Initial Load - Ragaa jalqabaa fiduuf
-  async function init() {
-    try {
-        const res = await fetch('index.php?action=get_init');
-        const data = await res.json();
-        
-        // 1. Store UI saaguu
-        if(data.settings.shop_name) document.getElementById('display-brand-name').innerText = data.settings.shop_name.toUpperCase();
-        if(data.settings.location) document.getElementById('display-location').innerText = "📍 " + data.settings.location;
-        
-        isAdminStatus = data.is_admin;
+    async function init() {
+        try {
+            const res = await fetch('index.php?action=get_init');
+            const data = await res.json();
+            
+            // Store UI saaguu
+            if(data.settings.shop_name) document.getElementById('display-brand-name').innerText = data.settings.shop_name.toUpperCase();
+            if(data.settings.location) document.getElementById('display-location').innerText = "📍 " + data.settings.location;
+            
+            isAdminStatus = data.is_admin;
 
-        // 2. --- DUPLICATE BALLEESSUU (LOGIC HAARAA) ---
-        // Meeshaalee database irraa dhufan keessaa maqaa wal-fakkaataa qaban ni calalla
-        const rawProducts = data.products;
-        allShoes = rawProducts.filter((shoe, index, self) =>
-            index === self.findIndex((s) => (
-                s.name.trim().toLowerCase() === shoe.name.trim().toLowerCase()
-            ))
-        );
-        // ----------------------------------------------
-        
-        if(isAdminStatus) {
-            currentKey = "naol123"; 
-            showAdminUI();
+            // DUPLICATE BALLEESSUU
+            const rawProducts = data.products;
+            allShoes = rawProducts.filter((shoe, index, self) =>
+                index === self.findIndex((s) => (
+                    s.name.trim().toLowerCase() === shoe.name.trim().toLowerCase()
+                ))
+            );
+            
+            if(isAdminStatus) {
+                currentKey = "naol123"; 
+                showAdminUI();
+            }
+            
+            renderShop(allShoes);
+
+        } catch (e) {
+            console.error("Load failed", e);
         }
-        
-        // 3. Meeshaalee calalaman qofa agarsiisuu
-        renderShop(allShoes);
-
-    } catch (e) {
-        console.error("Load failed", e);
     }
-}
+
     // 2. Render Products - Meeshaalee suuraa fi gatii wajjin baasuu
     function renderShop(items) {
         const container = document.getElementById('shop-display');
@@ -836,6 +835,10 @@ if ($success) {
     async function handlePurchase(id, name, price) {
         const bank = document.getElementById(`bank-${id}`).value;
         const size = document.getElementById(`size-${id}`).value;
+        const btn = event.target;
+
+        btn.innerText = "Processing...";
+        btn.disabled = true;
 
         const fd = new FormData();
         fd.append('action', 'place_order');
@@ -856,17 +859,20 @@ if ($success) {
         } catch (e) {
             console.error("Purchase failed", e);
             notify("ERROR", "Something went wrong with your order.");
+        } finally {
+            btn.innerText = "BUY NOW";
+            btn.disabled = false;
         }
     }
 
-    // 4. Admin Operations - Login, Delete, fi Password
+    // 4. Admin Operations
     function toggleAdmin() {
         const pass = prompt("Enter Admin Access Key:");
         if(pass === "naol123") {
             isAdminStatus = true;
             currentKey = pass;
             showAdminUI();
-            renderShop(allShoes); // Kuni 'Delete' button akka mul'atu godha
+            renderShop(allShoes);
             notify("System", "Admin privileges granted.");
         } else if(pass) {
             alert("Unauthorized access attempt.");
@@ -883,11 +889,9 @@ if ($success) {
     async function deleteProduct(id) {
         if(confirm("Shoe kana balleessuu barbaadduu?")) {
             try {
-                // Key kallaattiin asitti ergama
                 const res = await fetch(`index.php?delete_id=${id}&key=${currentKey}`);
                 if(res.ok) {
                     notify("Inventory", "Product removed successfully.");
-                    // List deebisanii fiduuf
                     const refreshRes = await fetch('index.php?action=get_init');
                     const data = await refreshRes.json();
                     allShoes = data.products;
@@ -896,29 +900,6 @@ if ($success) {
             } catch (e) {
                 alert("Balleessuu hin dandeenye!");
             }
-        }
-    }
-
-    async function saveNewPassword() {
-        const newPass = document.getElementById('admin-new-password').value;
-        if(!newPass) return alert("Maaloo password haaraa galchi!");
-
-        const fd = new FormData();
-        fd.append('action', 'change_pass');
-        fd.append('new_pass', newPass);
-
-        try {
-            const res = await fetch('index.php', { method: 'POST', body: fd });
-            const result = await res.json();
-
-            if(result.status === "success") {
-                showToast("Success", "Password milkiin jijjiirameera!");
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                alert("Password jijjiiruun hin danda'amne!");
-            }
-        } catch (e) {
-            console.error("Change pass failed", e);
         }
     }
 
@@ -991,7 +972,7 @@ if ($success) {
             document.getElementById('toast-title').innerText = title;
             document.getElementById('toast-msg').innerText = msg;
             t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 3000);
+            setTimeout(() => { t.style.display = 'none'; }, 4000);
         }
     }
 
@@ -1018,23 +999,10 @@ if ($success) {
         renderShop(filtered);
     }
 
-    // Syncing new orders for admin
-    async function checkNewOrders() {
-        if(!isAdminStatus) return;
-        try {
-            const res = await fetch('index.php?action=get_orders');
-            const data = await res.json();
-            if(data.length > 0) {
-                notify("ADMIN ALERT", `${data.length} orders haaraa dhufeera!`);
-            }
-        } catch (e) { console.log("Sync failed"); }
-    }
-
-    if(isAdminStatus) setInterval(checkNewOrders, 30000);
-
+    // Window Load
     window.onload = init;
 
-    // Closing sidebar on outside click
+    // Sidebar cufuuf bakka biraa yoo tuqan
     window.onclick = function(event) {
         const sidebar = document.getElementById('sidebar');
         if (event.target == sidebar) sidebar.classList.remove('active');
