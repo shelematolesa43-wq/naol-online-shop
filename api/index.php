@@ -57,6 +57,12 @@ $conn->query("CREATE TABLE IF NOT EXISTS orders (
     $size = $_POST['size'];
     $bank = $_POST['bank'];
 
+// $sql = "SELECT * FROM products"; 
+
+$sql = "SELECT * FROM products GROUP BY name ORDER BY id DESC";
+
+// 3. Sana booda query kana ni raawwatta:
+$result = mysqli_query($conn, $sql);
     // Database keessatti galchuuf (Naol akka arguuf)
     $stmt = $conn->prepare("INSERT INTO orders (product_name, price, size, bank) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("sdss", $name, $price, $size, $bank);
@@ -732,29 +738,39 @@ if ($success) {
     let orders = 0;
 
     // 1. Initial Load - Ragaa jalqabaa fiduuf
-    async function init() {
-        try {
-            const res = await fetch('index.php?action=get_init');
-            const data = await res.json();
-            
-            // Set Store UI
-            if(data.settings.shop_name) document.getElementById('display-brand-name').innerText = data.settings.shop_name.toUpperCase();
-            if(data.settings.location) document.getElementById('display-location').innerText = "📍 " + data.settings.location;
-            
-            isAdminStatus = data.is_admin;
-            allShoes = data.products;
-            
-            if(isAdminStatus) {
-                currentKey = "naol123"; 
-                showAdminUI();
-            }
-            
-            renderShop(allShoes);
-        } catch (e) {
-            console.error("Load failed", e);
-        }
-    }
+  async function init() {
+    try {
+        const res = await fetch('index.php?action=get_init');
+        const data = await res.json();
+        
+        // 1. Store UI saaguu
+        if(data.settings.shop_name) document.getElementById('display-brand-name').innerText = data.settings.shop_name.toUpperCase();
+        if(data.settings.location) document.getElementById('display-location').innerText = "📍 " + data.settings.location;
+        
+        isAdminStatus = data.is_admin;
 
+        // 2. --- DUPLICATE BALLEESSUU (LOGIC HAARAA) ---
+        // Meeshaalee database irraa dhufan keessaa maqaa wal-fakkaataa qaban ni calalla
+        const rawProducts = data.products;
+        allShoes = rawProducts.filter((shoe, index, self) =>
+            index === self.findIndex((s) => (
+                s.name.trim().toLowerCase() === shoe.name.trim().toLowerCase()
+            ))
+        );
+        // ----------------------------------------------
+        
+        if(isAdminStatus) {
+            currentKey = "naol123"; 
+            showAdminUI();
+        }
+        
+        // 3. Meeshaalee calalaman qofa agarsiisuu
+        renderShop(allShoes);
+
+    } catch (e) {
+        console.error("Load failed", e);
+    }
+}
     // 2. Render Products - Meeshaalee suuraa fi gatii wajjin baasuu
     function renderShop(items) {
         const container = document.getElementById('shop-display');
