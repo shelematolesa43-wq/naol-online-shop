@@ -287,7 +287,7 @@ if ($success) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAOL SHOP | Premium Sneakers</title>
+    <title>TYSON SHOES ONLINE SHOP | Premium Sneakers</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         /* --- CSS STYLING SECTION --- */
@@ -590,7 +590,7 @@ if ($success) {
 <body>
 
 <div class="sidebar" id="sidebar">
-    <h2 id="display-brand-name" style="letter-spacing: 2px; color: var(--cta);">NAOL SHOP</h2>
+    <h2 id="display-brand-name" style="letter-spacing: 2px; color: var(--cta);">TYSON SHOES</h2>
     <p id="display-location" style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">📍 Burrayu, Ethiopia</p>
     <div class="nav-links">
         <a id="login-link" onclick="toggleAdmin()"><span>🔑</span> Admin Central</a>
@@ -605,7 +605,7 @@ if ($success) {
  <nav>
     <div style="display:flex; align-items:center; gap:20px;">
         <span style="font-size:2rem; cursor:pointer;" onclick="toggleSidebar()">☰</span>
-        <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">NAOL</h1>
+        <h1 style="color:var(--cta); font-weight: 900; letter-spacing: -1px;">TYSON SHOES</h1>
     </div>
 
     <div style="flex-grow: 1; max-width: 500px; margin: 0 30px; display: flex;">
@@ -645,7 +645,7 @@ if ($success) {
     <div class="hero-banner">
         <div class="hero-overlay"></div>
         <div style="position:relative; z-index:5;">
-            <h1 class="miracle-text">NAOL ONLINE SHOP</h1>
+            <h1 class="miracle-text">TYSON SHOES</h1>
             <p style="font-size:1.2rem; margin-top:10px; font-weight:300;">Experience Quality. Comfort. Style.</p>
         </div>
     </div>
@@ -693,7 +693,7 @@ if ($success) {
 <footer>
     <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:40px; text-align:left;">
         <div>
-            <h2 style="color:var(--cta); margin-bottom:20px;">NAOL SHOP</h2>
+            <h2 style="color:var(--cta); margin-bottom:20px;">TYSON SHOES</h2>
             <p style="opacity:0.7; font-size:0.9rem;">The leading destination for premium footwear in Ethiopia. We bring style to your doorstep.</p>
         </div>
         <div>
@@ -711,7 +711,7 @@ if ($success) {
         </div>
     </div>
     <div style="margin-top:50px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1); opacity:0.5; font-size:0.8rem;">
-        &copy; 2026 NAOL SHOP. All Rights Reserved.
+        &copy; 2026 TYSON SHOES. All Rights Reserved.
     </div>
 </footer>
 
@@ -825,7 +825,7 @@ async function handlePurchase(id, name, price) {
         
         if(result.status === "success") {
             // 1. Show short pop-up message
-            showToast("Order Sent!", "Naol will contact you soon.");
+            showToast("Order Sent!", "TYSON SHOES will contact you soon.");
             
             // 2. Update the Notification Bell (🛎️) - This was missing!
             notify("NEW ORDER", `You ordered ${name} (Size: ${size}).`);
