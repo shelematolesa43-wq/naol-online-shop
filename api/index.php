@@ -1,279 +1,75 @@
 <?php
 session_start();
 
-$host = "mysql-11ead335-shelematolesa43-84db.g.aivencloud.com";
-$user = "avnadmin";
-$pass = 'AVNS__vcyJnLCW7tPcJRITMN'; 
-$db   = "defaultdb";
-$port = 23454;
+// ------------------------------------------------------------------
+// 1. AIVEN DATABASE CONFIGURATION & CONNECTION (SSL REQUIRED)
+// ------------------------------------------------------------------
+$host     = "tyson-shoes-db-shelematolesa43-84db.k.aivencloud.com";
+$port     = 23454;
+$username = "avnadmin";
+$password = "YOUR_AIVEN_PASSWORD"; // Password kee Aiven irraa kopii gochuu galchi
+$dbname   = "defaultdb";
 
+// MySQLi Connection uumuu
 $conn = mysqli_init();
 
-// SSL dabaladhu
-mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, FALSE);
+// Aiven SSL mode REQUIRED waan ta'eef flags set gochuu
+$conn->options(MYSQLI_OPT_CONNECT_TIMEOUT, 10);
+$conn->ssl_set(NULL, NULL, NULL, NULL, NULL); 
 
-// Connection
-$success = mysqli_real_connect($conn, $host, $user, $pass, $db, $port, NULL, MYSQLI_CLIENT_SSL);
+// Database waliin wal-qunnamuu
+$success = $conn->real_connect($host, $username, $password, $dbname, $port, NULL, MYSQLI_CLIENT_SSL);
 
 if (!$success) {
-    // Dogoggora DNS yoo ta'e asitti siif hima
-    die("Connection Error: " . mysqli_connect_error());
+    die("Database Connection Failed: " . mysqli_connect_error());
 }
 
-// --- DATABASE TABLES UUMUUF (KANA DABALADHU) ---
+// ------------------------------------------------------------------
+// 2. DATABASE TABLES INITIALIZATION (TABLE-OTA UUMUU)
+// ------------------------------------------------------------------
 if ($success) {
-    // 1. Table products
+    // 1. Table: products
     $conn->query("CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL UNIQUE,
         price DECIMAL(10, 2) NOT NULL,
         img_url VARCHAR(500),
         stock INT DEFAULT 10,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
-    // 2. Table shop_settings
+    // 2. Table: shop_settings
     $conn->query("CREATE TABLE IF NOT EXISTS shop_settings (
         id INT AUTO_INCREMENT PRIMARY KEY,
         setting_key VARCHAR(50) UNIQUE,
         setting_value TEXT
     )");
 
-    // 3. Initial settings galchuuf
-    $conn->query("INSERT IGNORE INTO shop_settings (setting_key, setting_value) VALUES ('shop_name', 'NAOL SHOP'), ('location', 'Burrayu, Ethiopia')");
-    // 5. Table orders uumuuf (Naol akka arguuf)
-$conn->query("CREATE TABLE IF NOT EXISTS orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_name VARCHAR(255),
-    size VARCHAR(20),
-    bank VARCHAR(50),
-    price DECIMAL(10, 2),
-    status VARCHAR(20) DEFAULT 'Pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)");
-    if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
-    $name = $_POST['item_name'];
-    $price = $_POST['price'];
-    $size = $_POST['size'];
-    $bank = $_POST['bank'];
+    // Initial settings galchuuf
+    $conn->query("INSERT IGNORE INTO shop_settings (setting_key, setting_value) 
+                  VALUES ('shop_name', 'NAOL SHOP'), ('location', 'Burrayu, Ethiopia')");
 
-// $sql = "SELECT * FROM products"; 
+    // 3. Table: orders
+    $conn->query("CREATE TABLE IF NOT EXISTS orders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_name VARCHAR(255),
+        size VARCHAR(20),
+        bank VARCHAR(50),
+        price DECIMAL(10, 2),
+        status VARCHAR(20) DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
 
-$sql = "SELECT * FROM products GROUP BY name ORDER BY id DESC";
-
-// 3. Sana booda query kana ni raawwatta:
-$result = mysqli_query($conn, $sql);
-    // Database keessatti galchuuf (Naol akka arguuf)
-    $stmt = $conn->prepare("INSERT INTO orders (product_name, price, size, bank) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sdss", $name, $price, $size, $bank);
-    $stmt->execute();
-
-    echo json_encode(["status" => "success"]);
-    exit;
-}
-    // 4. Admin user yoo hin jirre uumuuf (Username: admin, Password: password123)
+    // 4. Table: admin_users & Default Admin
     $pass_hash = password_hash('password123', PASSWORD_DEFAULT);
-    $conn->query("CREATE TABLE IF NOT EXISTS admin_users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) UNIQUE, password_hash VARCHAR(255))");
+    $conn->query("CREATE TABLE IF NOT EXISTS admin_users (
+        id INT AUTO_INCREMENT PRIMARY KEY, 
+        username VARCHAR(50) UNIQUE, 
+        password_hash VARCHAR(255)
+    )");
     $conn->query("INSERT IGNORE INTO admin_users (username, password_hash) VALUES ('admin', '$pass_hash')");
-}
-// ----------------------------------------------
-function isAdmin() {
-    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-}
 
-// 2.2 API: Handle Order & Send Email (Naol Shop Notification)
-if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
-    $name = $_POST['item_name'] ?? 'Unknown Item';
-    $price = $_POST['price'] ?? '0';
-    $size = $_POST['size'] ?? 'N/A';
-    $bank = $_POST['bank'] ?? 'N/A';
-
-    $to = "jnaol2002@gmail.com";
-    $subject = "New Order from NAOL SHOP";
-    $message = "You have a new order!\n\nProduct: $name\nPrice: ETB $price\nSize: $size\nPayment: $bank";
-    $headers = "From: webmaster@naolshop.vercel.app\r\n";
-    $headers .= "Reply-To: jnaol2002@gmail.com";
-
-    // Vercel irratti mail() hojjechuu dhiisuu danda'a (Check Build Logs)
-    if(mail($to, $subject, $message, $headers)) {
-        echo json_encode(["status" => "success"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Mail server error"]);
-    }
-    exit;
-}
-
-// 2.3 Auth: Login Logic
-if (isset($_POST['action']) && $_POST['action'] == 'login') {
-    $admin_user = $_POST['username'];
-    $admin_pass = $_POST['password'];
-    
-    $stmt = $conn->prepare("SELECT password_hash FROM admin_users WHERE username = ?");
-    $stmt->bind_param("s", $admin_user);
-    $stmt->execute();
-    $res = $stmt->get_result()->fetch_assoc();
-
-    if ($res && password_verify($admin_pass, $res['password_hash'])) {
-        $_SESSION['admin_logged_in'] = true;
-        echo json_encode(["status" => "success"]);
-    } else {
-        header('HTTP/1.1 401 Unauthorized');
-        echo json_encode(["status" => "fail"]);
-    }
-    exit;
-}
-
-// 2.4 Auth: Logout
-if (isset($_GET['action']) && $_GET['action'] == 'logout') {
-    session_destroy();
-    header("Location: index.php");
-    exit;
-}
-
-// 2.5 Data Fetching: Initialization
-if (isset($_GET['action']) && $_GET['action'] == 'get_init') {
-    header('Content-Type: application/json');
-    
-    // Shop settings fetch
-    $settings_query = $conn->query("SELECT * FROM shop_settings");
-    $settings = $settings_query ? $settings_query->fetch_all(MYSQLI_ASSOC) : [];
-    
-    // Products fetch
-    $products_query = $conn->query("SELECT * FROM products ORDER BY id DESC");
-    $products = $products_query ? $products_query->fetch_all(MYSQLI_ASSOC) : [];
-    
-    echo json_encode([
-        "settings" => array_column($settings, 'setting_value', 'setting_key'),
-        "products" => $products,
-        "is_admin" => isAdmin()
-    ]);
-    exit;
-}
-
-// 2.6 Product Management: Create (Upload)
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_shoe'])) {
-    if (!isset($_POST['admin_key']) || $_POST['admin_key'] !== "naol123") {
-        header('HTTP/1.1 403 Forbidden');
-        exit("Invalid Admin Key");
-    }
-
-    $name = htmlspecialchars($_POST['name']);
-    $price = floatval($_POST['price']);
-    $stock = intval($_POST['stock']);
-    $img_url = "https://via.placeholder.com/300x200?text=No+Image";
-
-    if (isset($_FILES['shoeFile']) && $_FILES['shoeFile']['error'] == 0) {
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        $ext = strtolower(pathinfo($_FILES["shoeFile"]["name"], PATHINFO_EXTENSION));
-        
-        if (in_array($ext, $allowed)) {
-            $target_dir = "uploads/"; // Vercel irratti kun yeroo gabaabaaf qofa tura
-            if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
-            $file_name = time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
-            $target_path = $target_dir . $file_name;
-            
-            if (move_uploaded_file($_FILES["shoeFile"]["tmp_name"], $target_path)) {
-                $img_url = $target_path;
-            }
-        }
-    }
-
-    $stmt = $conn->prepare("INSERT INTO products (name, price, img_url, stock) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sdsi", $name, $price, $img_url, $stock);
-    $stmt->execute();
-    header("Location: index.php"); // Refresh after add
-    exit;
-}
-
-// 2.7 Settings Management: Update
-if (isset($_POST['update_settings']) && isAdmin()) {
-    foreach(['shop_name', 'location'] as $key) {
-        if(isset($_POST[$key])) {
-            $stmt = $conn->prepare("UPDATE shop_settings SET setting_value = ? WHERE setting_key = ?");
-            $stmt->bind_param("ss", $_POST[$key], $key);
-            $stmt->execute();
-        }
-    }
-    exit;
-}
-
-// --- ADMIN OPERATIONS ---
-// 1. Delete Product
-if (isset($_GET['delete_id']) && isset($_GET['key']) && $_GET['key'] === "naol123") {
-    $id = intval($_GET['delete_id']);
-    $conn->query("DELETE FROM products WHERE id = $id");
-    header("Location: index.php?msg=Deleted");
-    exit;
-}
-
-// 2. Change Admin Password (POST request)
-if (isset($_POST['action']) && $_POST['action'] === 'change_pass' && isset($_POST['new_pass'])) {
-    $new_hash = password_hash($_POST['new_pass'], PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("UPDATE admin_users SET password_hash = ? WHERE username = 'admin'");
-    $stmt->bind_param("s", $new_hash);
-    if($stmt->execute()) {
-        echo json_encode(["status" => "success"]);
-    } else {
-        echo json_encode(["status" => "error"]);
-    }
-    exit;
-}
-
-// 2.9 Product Management: Update (Edit)
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_shoe'])) {
-    if (!isset($_POST['admin_key']) || $_POST['admin_key'] !== "naol123") {
-        header('HTTP/1.1 403 Forbidden');
-        exit;
-    }
-    $stmt = $conn->prepare("UPDATE products SET name = ?, price = ? WHERE id = ?");
-    $stmt->bind_param("sdi", $_POST['name'], $_POST['price'], $_POST['id']);
-    $stmt->execute();
-    header("Location: index.php");
-    exit;
-}
-
-// 2.10 API: Get Shoes List
-if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
-    header('Content-Type: application/json');
-    $result = $conn->query("SELECT * FROM products ORDER BY id DESC");
-    echo json_encode($result->fetch_all(MYSQLI_ASSOC));
-    exit;
-}
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_shoe'])) {
-    $name = htmlspecialchars($_POST['name']);
-    $price = floatval($_POST['price']);
-    $stock = intval($_POST['stock']);
-    $img_url = "https://via.placeholder.com/300x200?text=No+Image"; // Yoo suuraan hin jirre
-
-    if (isset($_FILES['shoeFile']) && $_FILES['shoeFile']['error'] == 0) {
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        $ext = strtolower(pathinfo($_FILES["shoeFile"]["name"], PATHINFO_EXTENSION));
-        
-        if (in_array($ext, $allowed)) {
-            $target_dir = "uploads/";
-            if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
-            
-            // Maqaa fayilaa adda gochuuf (Fakkeenya: 1714001234_a2b3c4.jpg)
-            $file_name = time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
-            $target_path = $target_dir . $file_name;
-            
-            if (move_uploaded_file($_FILES["shoeFile"]["tmp_name"], $target_path)) {
-                $img_url = $target_path; 
-            }
-        }
-    }
-
-    $stmt = $conn->prepare("INSERT INTO products (name, price, img_url, stock) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sdsi", $name, $price, $img_url, $stock);
-    $stmt->execute();
-    header("Location: index.php");
-    exit;
-}
-        // --- DATABASE TABLES UUMUUF ---
-if ($success) {
-    // ... koodii table uumuuf ati qabdu jira ...
-
-    // --- SHOES 12 KALLAATTIIN GALCHUUF ---
+    // 5. Default Shoes 12 Direct Seed Gochuuf
     $google_shoes = [
         ['name' => 'Nike Air Force 1', 'price' => 4500, 'url' => 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=1000'],
         ['name' => 'Adidas Superstar', 'price' => 3800, 'url' => 'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?q=80&w=1000'],
@@ -290,11 +86,179 @@ if ($success) {
     ];
 
     foreach ($google_shoes as $shoe) {
-        // 'INSERT IGNORE' yoo jenne data dachaa (duplicate) nuuf hin galchu
         $stmt = $conn->prepare("INSERT IGNORE INTO products (name, price, img_url) VALUES (?, ?, ?)");
         $stmt->bind_param("sds", $shoe['name'], $shoe['price'], $shoe['url']);
         $stmt->execute();
     }
+}
+
+// Helper Function: Check Admin Auth
+function isAdmin() {
+    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+}
+
+// ------------------------------------------------------------------
+// 3. API ENDPOINTS & LOGIC HANDLERS
+// ------------------------------------------------------------------
+
+// 3.1 Place Order Logic
+if (isset($_POST['action']) && $_POST['action'] == 'place_order') {
+    $name  = $_POST['item_name'] ?? 'Unknown Item';
+    $price = $_POST['price'] ?? 0;
+    $size  = $_POST['size'] ?? 'N/A';
+    $bank  = $_POST['bank'] ?? 'N/A';
+
+    // Database orders table-tiitti save gochuu
+    $stmt = $conn->prepare("INSERT INTO orders (product_name, price, size, bank) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sdss", $name, $price, $size, $bank);
+    $stmt->execute();
+
+    // Email notification erguuf
+    $to = "jnaol2002@gmail.com";
+    $subject = "New Order from NAOL SHOP";
+    $message = "You have a new order!\n\nProduct: $name\nPrice: ETB $price\nSize: $size\nPayment: $bank";
+    $headers = "From: webmaster@naolshop.vercel.app\r\n";
+    $headers .= "Reply-To: jnaol2002@gmail.com";
+
+    @mail($to, $subject, $message, $headers); // Vercel irratti warning akka hin laanne @ itti dabalameera
+
+    echo json_encode(["status" => "success"]);
+    exit;
+}
+
+// 3.2 Login Logic
+if (isset($_POST['action']) && $_POST['action'] == 'login') {
+    $admin_user = $_POST['username'] ?? '';
+    $admin_pass = $_POST['password'] ?? '';
+    
+    $stmt = $conn->prepare("SELECT password_hash FROM admin_users WHERE username = ?");
+    $stmt->bind_param("s", $admin_user);
+    $stmt->execute();
+    $res = $stmt->get_result()->fetch_assoc();
+
+    if ($res && password_verify($admin_pass, $res['password_hash'])) {
+        $_SESSION['admin_logged_in'] = true;
+        echo json_encode(["status" => "success"]);
+    } else {
+        header('HTTP/1.1 401 Unauthorized');
+        echo json_encode(["status" => "fail"]);
+    }
+    exit;
+}
+
+// 3.3 Logout Logic
+if (isset($_GET['action']) && $_GET['action'] == 'logout') {
+    session_destroy();
+    header("Location: index.php");
+    exit;
+}
+
+// 3.4 API: Get Init Data (Settings + Products)
+if (isset($_GET['action']) && $_GET['action'] == 'get_init') {
+    header('Content-Type: application/json');
+    
+    $settings_query = $conn->query("SELECT * FROM shop_settings");
+    $settings = $settings_query ? $settings_query->fetch_all(MYSQLI_ASSOC) : [];
+    
+    $products_query = $conn->query("SELECT * FROM products ORDER BY id DESC");
+    $products = $products_query ? $products_query->fetch_all(MYSQLI_ASSOC) : [];
+    
+    echo json_encode([
+        "settings" => array_column($settings, 'setting_value', 'setting_key'),
+        "products" => $products,
+        "is_admin" => isAdmin()
+    ]);
+    exit;
+}
+
+// 3.5 Product Management: Add Shoe (Upload)
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_shoe'])) {
+    if (!isset($_POST['admin_key']) || $_POST['admin_key'] !== "naol123") {
+        header('HTTP/1.1 403 Forbidden');
+        exit("Invalid Admin Key");
+    }
+
+    $name = htmlspecialchars($_POST['name']);
+    $price = floatval($_POST['price']);
+    $stock = intval($_POST['stock']);
+    $img_url = "https://via.placeholder.com/300x200?text=No+Image";
+
+    if (isset($_FILES['shoeFile']) && $_FILES['shoeFile']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $ext = strtolower(pathinfo($_FILES["shoeFile"]["name"], PATHINFO_EXTENSION));
+        
+        if (in_array($ext, $allowed)) {
+            $target_dir = "uploads/";
+            if (!is_dir($target_dir)) mkdir($target_dir, 0755, true);
+            $file_name = time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
+            $target_path = $target_dir . $file_name;
+            
+            if (move_uploaded_file($_FILES["shoeFile"]["tmp_name"], $target_path)) {
+                $img_url = $target_path;
+            }
+        }
+    }
+
+    $stmt = $conn->prepare("INSERT INTO products (name, price, img_url, stock) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sdsi", $name, $price, $img_url, $stock);
+    $stmt->execute();
+    header("Location: index.php");
+    exit;
+}
+
+// 3.6 Settings Management: Update
+if (isset($_POST['update_settings']) && isAdmin()) {
+    foreach(['shop_name', 'location'] as $key) {
+        if(isset($_POST[$key])) {
+            $stmt = $conn->prepare("UPDATE shop_settings SET setting_value = ? WHERE setting_key = ?");
+            $stmt->bind_param("ss", $_POST[$key], $key);
+            $stmt->execute();
+        }
+    }
+    header("Location: index.php");
+    exit;
+}
+
+// 3.7 Admin: Delete Product
+if (isset($_GET['delete_id']) && isset($_GET['key']) && $_GET['key'] === "naol123") {
+    $id = intval($_GET['delete_id']);
+    $conn->query("DELETE FROM products WHERE id = $id");
+    header("Location: index.php?msg=Deleted");
+    exit;
+}
+
+// 3.8 Admin: Change Password
+if (isset($_POST['action']) && $_POST['action'] === 'change_pass' && isset($_POST['new_pass'])) {
+    $new_hash = password_hash($_POST['new_pass'], PASSWORD_DEFAULT);
+    $stmt = $conn->prepare("UPDATE admin_users SET password_hash = ? WHERE username = 'admin'");
+    $stmt->bind_param("s", $new_hash);
+    if($stmt->execute()) {
+        echo json_encode(["status" => "success"]);
+    } else {
+        echo json_encode(["status" => "error"]);
+    }
+    exit;
+}
+
+// 3.9 Admin: Update Product (Edit)
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_shoe'])) {
+    if (!isset($_POST['admin_key']) || $_POST['admin_key'] !== "naol123") {
+        header('HTTP/1.1 403 Forbidden');
+        exit;
+    }
+    $stmt = $conn->prepare("UPDATE products SET name = ?, price = ? WHERE id = ?");
+    $stmt->bind_param("sdi", $_POST['name'], $_POST['price'], $_POST['id']);
+    $stmt->execute();
+    header("Location: index.php");
+    exit;
+}
+
+// 3.10 API: Get Shoes List
+if (isset($_GET['action']) && $_GET['action'] == 'get_shoes') {
+    header('Content-Type: application/json');
+    $result = $conn->query("SELECT * FROM products ORDER BY id DESC");
+    echo json_encode($result ? $result->fetch_all(MYSQLI_ASSOC) : []);
+    exit;
 }
 ?>
 <!DOCTYPE html>
